@@ -1,0 +1,315 @@
+div.ardp-date-picker {
+    font-size: 16px;
+    font-family: Calibri;
+    box-sizing: border-box;
+    position: relative;
+    line-height: 1.2;
+}
+
+div.ardp-date-picker > input {
+    background: url("/statics/images/date-picker-icon.png") #fff 5px center no-repeat !important;
+    text-indent: 24px;
+    font: 14px Calibri !important;
+    text-align: left;
+    padding: 3px;
+    border: solid 1px #ccc;
+}
+
+div.ardp-date-picker .minWidthInput {
+    min-width: 150px;
+}
+
+div.ardp-date-picker * {
+    box-sizing: border-box;
+}
+
+div.ardp-date-picker div.calendar {
+    position: absolute;
+    z-index: 999;
+    background: white;
+    width: 260px;
+    padding: 5px;
+    color: #244152;
+    border-radius: 3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+div.ardp-date-picker div.calendar.calendar-show {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 100ms linear;
+}
+
+div.ardp-date-picker div.calendar.calendar-hide {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 100ms, opacity 100ms linear;
+}
+
+div.ardp-date-picker div.calendar div.month-header {
+    float: left;
+    width: 100%;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    align-items: center;
+}
+
+div.ardp-date-picker div.calendar div.month-header > i {
+    font-weight: bold;
+    padding: 5px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-style: normal;
+    font-size: 0.7em;
+}
+
+div.ardp-date-picker div.calendar div.month-header > i:hover {
+    background-color: #026aa7;
+    color: white;
+}
+
+div.ardp-date-picker div.calendar div.week-header {
+    float: left;
+    width: 100%;
+    margin-top: 8px;
+    display: table;
+    padding-bottom: 3px;
+    border-bottom: solid 1px #CCC;
+    margin-bottom: 3px;
+}
+
+div.ardp-date-picker div.calendar div.week-header > span {
+    float: left;
+    width: 14.285714285714286%;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    color: #026aa7;
+    font-weight: bold;
+    text-align: center;
+}
+
+div.ardp-date-picker div.calendar div.weeks {
+    float: left;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    height: 140px;
+}
+
+div.ardp-date-picker div.calendar div.weeks > div {
+    position: absolute;
+    width: 250px;
+}
+
+div.ardp-date-picker div.calendar div.weeks > div.current {
+    left: 0;
+}
+
+div.ardp-date-picker div.calendar div.weeks > div.other {
+    left: 250px;
+}
+
+div.ardp-date-picker div.calendar div.weeks > div.other.right {
+    left: -250px;
+}
+
+div.ardp-date-picker div.calendar div.weeks > div.sliding {
+    transition: transform 250ms ease;
+    -webkit-transition: -webkit-transform 250ms ease;
+}
+
+div.ardp-date-picker div.calendar div.weeks > div.sliding.left {
+    transform: translate3d(-250px, 0, 0);
+    -webkit-transform: translate3d(-250px, 0, 0);
+}
+
+div.ardp-date-picker div.calendar div.weeks > div.sliding.right {
+    transform: translate3d(250px, 0, 0);
+    -webkit-transform: translate3d(250px, 0, 0);
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week {
+    float: left;
+    width: 100%;
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week div.day {
+    float: left;
+    width: 14.285714285714286%;
+    font-size: 0.8em;
+    padding: 4px 0;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 3px;
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week div.day:hover {
+    background: #EAEAEA;
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week div.day.other-month {
+    color: #AAA;
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week div.day.disabled {
+    color: #E0E0E0;
+    cursor: default;
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week div.day.disabled:hover {
+    background: transparent !important;
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week div.day.today {
+    background: #68b53e;
+    color: white;
+}
+
+div.ardp-date-picker div.calendar div.weeks div.week div.day.selected {
+    background: #026aa7;
+    color: white;
+}
+
+/* DivTable.com */
+div.ardp-date-picker .TimePicker {
+    display: table;
+    width: 100%;
+    padding-top: 2px;
+    border-top: 1px solid #ccc;
+}
+
+div.ardp-date-picker .divTableRow {
+    display: table-row;
+}
+
+div.ardp-date-picker .divTableCell, .divTableHead {
+    display: table-cell;
+    padding: 2px 6px 2px 3px;
+    font-size: 14px;
+    text-align: left;
+}
+
+div.ardp-date-picker .divTableBody {
+    display: table-row-group;
+}
+
+div.ardp-date-picker .TimePicker input[type=range] {
+    /*removes default webkit styles*/
+    -webkit-appearance: none;
+
+    /*fix for FF unable to apply focus style bug */
+    border: 1px solid white;
+    width: 100% !important;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]::-webkit-slider-runnable-track {
+    height: 5px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #2C3E50;
+    margin-top: -4px;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]:focus {
+    outline: none;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]::-moz-range-track {
+    height: 5px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]::-moz-range-thumb {
+    border: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #2C3E50;
+}
+
+/*hide the outline behind the border*/
+div.ardp-date-picker .TimePicker input[type=range]:-moz-focusring {
+    outline: 1px solid white;
+    outline-offset: -1px;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]::-ms-track {
+    height: 5px;
+
+    /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+    background: transparent;
+
+    /*leave room for the larger thumb to overflow with a transparent border */
+    border-color: transparent;
+    border-width: 6px 0;
+
+    /*remove default tick marks*/
+    color: transparent;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]::-ms-fill-lower {
+    background: #777;
+    border-radius: 10px;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]::-ms-fill-upper {
+    background: #ddd;
+    border-radius: 10px;
+}
+
+div.ardp-date-picker .TimePickerinput[type=range]::-ms-thumb {
+    border: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #2C3E50;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]:focus::-ms-fill-lower {
+    background: #888;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]:focus::-ms-fill-upper {
+    background: #ccc;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]:hover::-webkit-slider-thumb {
+    cursor: pointer;
+    background: #1abc9c;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]:active::-webkit-slider-thumb {
+    cursor: pointer;
+    background: #1abc9c;
+}
+
+div.ardp-date-picker .TimePicker input[type=range]:hover {
+    cursor: pointer;
+}
+
+div.ardp-date-picker .TimePicker .content_range_input::-ms-tooltip {
+    display: none;
+}
+
+div.ardp-date-picker.label-date-picker {
+    height: 0 !important;
+    width: 0 !important;
+}

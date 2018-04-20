@@ -1,0 +1,183 @@
+div.ardp-time-picker {
+    font-size: 16px;
+    font-family: Calibri;
+    box-sizing: border-box;
+    position: relative;
+    line-height: 1.2;
+}
+
+div.ardp-time-picker > input {
+    background: url("/statics/images/date-picker-icon.png") #fff 5px center no-repeat !important;
+    text-indent: 24px;
+    font: 14px Calibri !important;
+    text-align: left;
+    padding: 3px;
+    border: solid 1px #ccc;
+}
+
+div.ardp-time-picker * {
+    box-sizing: border-box;
+}
+
+div.ardp-time-picker div.calendar {
+    position: absolute;
+    z-index: 999;
+    background: white;
+    width: 260px;
+    padding: 5px;
+    color: #244152;
+    border-radius: 3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+div.ardp-time-picker div.calendar.calendar-show {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 100ms linear;
+}
+
+div.ardp-time-picker div.calendar.calendar-hide {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 100ms, opacity 100ms linear;
+}
+
+/* DivTable.com */
+div.ardp-time-picker .TimePicker {
+    display: table;
+    width: 100%;
+}
+
+div.ardp-time-picker .divTableRow {
+    display: table-row;
+}
+
+div.ardp-time-picker .divTableCell, .divTableHead {
+    display: table-cell;
+    padding: 2px 6px 2px 3px;
+    font-size: 14px;
+    text-align: left;
+}
+
+div.ardp-time-picker .divTableBody {
+    display: table-row-group;
+}
+
+div.ardp-time-picker .TimePicker input[type=range] {
+    /*removes default webkit styles*/
+    -webkit-appearance: none;
+
+    /*fix for FF unable to apply focus style bug */
+    border: 1px solid white;
+    width: 100% !important;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]::-webkit-slider-runnable-track {
+    height: 5px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #2C3E50;
+    margin-top: -4px;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]:focus {
+    outline: none;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]::-moz-range-track {
+    height: 5px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]::-moz-range-thumb {
+    border: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #2C3E50;
+}
+
+/*hide the outline behind the border*/
+div.ardp-time-picker .TimePicker input[type=range]:-moz-focusring {
+    outline: 1px solid white;
+    outline-offset: -1px;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]::-ms-track {
+    height: 5px;
+
+    /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+    background: transparent;
+
+    /*leave room for the larger thumb to overflow with a transparent border */
+    border-color: transparent;
+    border-width: 6px 0;
+
+    /*remove default tick marks*/
+    color: transparent;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]::-ms-fill-lower {
+    background: #777;
+    border-radius: 10px;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]::-ms-fill-upper {
+    background: #ddd;
+    border-radius: 10px;
+}
+
+div.ardp-time-picker .TimePickerinput[type=range]::-ms-thumb {
+    border: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #2C3E50;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]:focus::-ms-fill-lower {
+    background: #888;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]:focus::-ms-fill-upper {
+    background: #ccc;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]:hover::-webkit-slider-thumb {
+    cursor: pointer;
+    background: #1abc9c;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]:active::-webkit-slider-thumb {
+    cursor: pointer;
+    background: #1abc9c;
+}
+
+div.ardp-time-picker .TimePicker input[type=range]:hover {
+    cursor: pointer;
+}
+
+div.ardp-time-picker .TimePicker .content_range_input::-ms-tooltip {
+    display: none;
+}
+
+div.ardp-time-picker.label-date-picker {
+    height: 0 !important;
+    width: 0 !important;
+}

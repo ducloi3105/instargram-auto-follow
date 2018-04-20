@@ -1,0 +1,398 @@
+.noselect,
+.jsx-btn-2,
+.jsx-btn-3,
+.jsx-btn {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.invisible {
+    visibility: hidden !important;
+}
+
+.display-none {
+    display: none;
+}
+
+.jsx-flipswitch {
+    width: 35px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.jsx-flipswitch > i {
+    width: 18px;
+    height: 4px;
+    position: relative;
+    background-color: #e2e2e2;
+    border-radius: 10px;
+}
+
+.jsx-flipswitch.on > i {
+    background-color: #2ea2c761;
+}
+
+.jsx-flipswitch > i::before {
+    content: ' ';
+    width: 14px;
+    height: 14px;
+    background: rgba(205, 206, 210, 1);
+    display: block;
+    position: absolute;
+    left: -6px;
+    top: -5px;
+    border-radius: 100%;
+    transition: left 0.3s ease-out, background-color 0.3s ease-out;
+}
+
+.jsx-flipswitch.on > i::before {
+    background: #2ea2c7;
+    left: 10px;
+}
+
+.jsx-btn-2 {
+    cursor: pointer;
+    opacity: 1;
+    border-radius: 4px;
+    line-height: 28px;
+    min-height: 30px;
+    padding: 0 20px;
+    color: #8493a8;
+    background: #eceff4;
+    border: solid 1px #dedede;
+    background: linear-gradient(to bottom, #fff 0%, #f6f6f6 100%);
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.jsx-btn-2.disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.jsx-btn-3 {
+    cursor: pointer;
+    display: flex;
+    background: #fff;
+    border: solid 1px #d8d8d8;
+    border-radius: 4px;
+    color: #607180;
+    font-size: 11px;
+    line-height: 30px;
+    padding: 0 12px;
+    font-weight: bold;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+.jsx-btn-3:not(.disabled):hover {
+    background: #e9ebee;
+}
+
+.jsx-btn-3.disabled {
+    cursor: default;
+    color: rgba(96, 113, 128, 0.35);
+    border: 1px solid rgba(228, 228, 228, 1);
+    box-shadow: unset;
+}
+
+.jsx-btn-3 > i {
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+.jsx-btn-3 > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.jsx-btn {
+    cursor: pointer;
+    display: flex;
+    background: #fff;
+    border: solid 1px #d8d8d8;
+    border-radius: 3px;
+    box-shadow: 0 2px 0 #f5f5f5;
+    color: #607180;
+    font-size: 11px;
+    line-height: 30px;
+    padding: 0 16px;
+    font-weight: bold;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+.jsx-btn.disabled {
+    cursor: default;
+    color: rgba(96, 113, 128, 0.35);
+    border: 1px solid rgba(228, 228, 228, 1);
+    box-shadow: unset;
+}
+
+.jsx-btn > i {
+    font-size: 18px;
+    margin-right: 6px;
+}
+
+.jsx-btn > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    display: inline-block;
+}
+
+.jsx-input {
+    position: relative;
+}
+
+.jsx-input > .warning-message {
+    position: absolute;
+    padding-top: 5px;
+    padding-left: 5px;
+    color: #ff6969;
+    font-size: 12px;
+}
+
+.jsx-input > input {
+    width: 100%;
+    min-height: 30px;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    /* padding: 8px 12px; */
+    padding: 5px 10px;
+    color: #333;
+    font: normal 13px Arial;
+    /*line-height: 18px;*/
+    background-color: #fff;
+    display: block;
+    transition: border-color 0.2s ease-out;
+}
+
+.jsx-input > input:focus {
+    outline: #4d90fe auto 1px;
+}
+
+.jsx-input.not-valid > input {
+    border-color: #ff9494 !important;
+}
+
+.jsx-input.not-valid > input:focus {
+    outline: #ff9494 auto 1px;
+}
+
+.jsx-toggle-btn {
+    cursor: pointer;
+    display: flex;
+    background: #fcfdff;
+    border: solid 1px #d8d8d8;
+    border-radius: 4px;
+    color: #abaec0;
+    font-size: 11px;
+    line-height: 30px;
+    padding: 0 12px;
+    font-weight: bold;
+    align-items: center;
+}
+
+.jsx-toggle-btn:not(.active):hover {
+    background-color: #00000014;
+}
+
+.jsx-toggle-btn.active {
+    background: #2d343b;
+    color: #fcffff;
+}
+
+.jsx-toggle-btn > i {
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+.jsx-toggle-btn > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.jsx-suggest-panel {
+    position: relative;
+}
+
+.jsx-suggest-panel .jsx-suggest-wrapper {
+    position: absolute;
+    margin: 11px 0;
+    width: 100%;
+    border: 1px solid #87a5bb;
+    z-index: 999;
+    background: white;
+    border-radius: 3px;
+    overflow: hidden;
+    -webkit-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.33);
+    -moz-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.33);
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.33);
+}
+
+.jsx-suggest-panel .jsx-suggest-scrollbar {
+}
+
+.jsx-suggest-scrollbar > .scroll-wrapper-view {
+    padding-right: unset !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.jsx-suggest-item {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid #87a5bb47;
+    cursor: pointer;
+}
+
+.jsx-suggest-item:hover {
+    background-color: #f1f8fe;
+}
+
+.jsx-suggest-item:last-child {
+    border-bottom: 0;
+}
+
+.jsx-suggest-item > .avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: gray;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 10px;
+}
+
+.jsx-suggest-item > .info {
+    flex-grow: 1;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    padding-top: 2px;
+}
+
+.jsx-suggest-item > .info > .title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #586877;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.jsx-suggest-item > .info > .description {
+    color: #a5a7ad;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.jsx-arrow {
+    position: absolute;
+    bottom: -11px;
+    right: 20px;
+    z-index: 1000;
+    width: 0;
+    height: 0;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent transparent #87a5bb transparent;
+}
+
+.jsx-arrow-border {
+    bottom: -12px;
+    border-color: transparent transparent white transparent;
+}
+
+.upside-down .jsx-arrow {
+    position: absolute;
+    top: -11px;
+    right: 20px;
+    z-index: 1000;
+    width: 0;
+    height: 0;
+    border-width: 8px;
+    border-style: solid;
+    border-color: #87a5bb transparent transparent transparent;
+}
+
+.upside-down .jsx-arrow-border {
+    top: -12px;
+    border-color: white transparent transparent transparent;
+}
+
+.jsx-suggest-panel .suggestion-empty {
+    padding: 10px;
+    color: gray;
+    cursor: default;
+    text-align: center;
+}
+
+.jsx-suggest-panel .loading-overlay {
+    display: block;
+    height: 100px;
+}
+
+.square-avatar-picker {
+    display: flex;
+    width: 60px;
+    height: 60px;
+    outline: 1px solid #dbdbdb;
+    position: relative;
+    cursor: pointer;
+}
+
+    .square-avatar-picker:hover {
+        outline: 1px solid #000;
+    }
+
+    .square-avatar-picker i.fa {
+        margin: auto;
+        opacity: .3;
+        font-size: 15px;
+    }
+
+    .square-avatar-picker:hover i.fa {
+        opacity: .7;
+    }
+
+    .square-avatar-picker .clear-btn {
+        position: absolute;
+        padding: 0 0 0 2px;
+        top: 0;
+        right: 0;
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+        opacity: .5;
+        user-select: none;
+    }
+
+    .square-avatar-picker .clear-btn:hover {
+        opacity: 1;
+    }
+
+.square-logo-picker.trans-bg {
+    background: url(/statics/images/transparentbg.png) repeat;
+}

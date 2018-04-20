@@ -1,0 +1,9 @@
+.loading-panel {
+    padding: 20px;
+    text-align: center;
+}
+
+.loading-panel .fa {
+    font-size: 50px;
+}
+
