@@ -74,13 +74,13 @@ module.exports = (env) => {
         resolve: {
             extensions: ['.js', '.jsx']
         },
-        externals: {
-            'react': 'React',
-            'react-dom': 'ReactDOM',
-            'create-react-class': 'React.createClass',
-            'jquery': 'jQuery'
-            // 'lodash': 'lodash'
-        },
+        // externals: {
+        //     'react': 'React',
+        //     'react-dom': 'ReactDOM',
+        //     'create-react-class': 'React.createClass',
+        //     'jquery': 'jQuery'
+        //     // 'lodash': 'lodash'
+        // },
         // watch: false,
         watchOptions: {
             aggregateTimeout: 300,
