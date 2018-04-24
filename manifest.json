@@ -7,8 +7,6 @@
     "default_popup": "./statics/html/follow-fb.html"
   },
   "permissions": [
-    "http://facebook.com/",
-    "http://instagram.com/"
   ],
   "manifest_version": 2
 }

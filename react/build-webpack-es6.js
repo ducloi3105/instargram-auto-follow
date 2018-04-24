@@ -16,7 +16,7 @@ let WebpackBundleSizeAnalyzerPlugin = require('webpack-bundle-size-analyzer').We
 
 let CONFIG = {
     modulesFolder: './modules',
-    outputFolder: 'bundles',
+    outputFolder: '../statics/bundles',
     moduleEntryFile: 'app.jsx'
 };
 let resolvePath = (...args) => path.resolve(__dirname, ...args);

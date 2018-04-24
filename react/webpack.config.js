@@ -33,7 +33,7 @@ module.exports = (env) => {
             console.log('=-=============',__dirname);
             return {
                 publicPath: __dirname,
-                path: __dirname + '/bundles',
+                path: __dirname + '/../statics/bundles',
                 filename: "[name].js"
             }
         })(),

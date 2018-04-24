@@ -7,9 +7,10 @@ class App extends React.Component {
         super();
         this.state = {
             clientId: 'c7ae8feae5d64411b5e28a0c1f06fa1b',
-            redirectUri: 'http://192.168.60.73:1234',
+            redirectUri: 'http://192.168.60.73:1234/auth/instagram/callback',
         };
-        this.openPopup = this.openPopup.bind(this)
+        this.openPopup = this.openPopup.bind(this);
+        this.onLogin = this.onLogin.bind(this);
     }
 
     openPopup() {
@@ -24,6 +25,24 @@ class App extends React.Component {
         return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
     }
 
+    onLogin(){
+        let publicKey = 'MvD4ZgHXi44YuPQSRRNApEuQDc4';
+        let loginTo = 'instagram';
+        let redirectUri=this.state.redirectUri;
+        OAuth.initialize(publicKey);
+
+        OAuth.popup(loginTo).done(instagram => {
+            console.log('instagram:', instagram);
+            instagram.me().then(data => {
+                console.log('me data:', data);
+                alert('Instagram says your name is ' + data.name + ".\nView browser 'Console Log' for more details");
+            });
+
+            instagram.get('/v1/users/self').then(data => {
+                console.log('self data:', data);
+            })
+        }).fail((ex)=>{console.log(ex)});
+    }
     render() {
         return (
             <div className="follow-container">
