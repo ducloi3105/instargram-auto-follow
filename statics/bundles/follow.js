@@ -59,12 +59,12 @@ var App = function (_React$Component) {
     }, {
         key: 'onLogin',
         value: function onLogin() {
-            var publicKey = 'MvD4ZgHXi44YuPQSRRNApEuQDc4';
+            console.log('ádd');
+            var publicKey = '1q65G1o9uDePDgZXhIt7xEgaL-A'; //demo
             var loginTo = 'instagram';
-            var redirectUri = this.state.redirectUri;
             _oauthioWeb.OAuth.initialize(publicKey);
 
-            _oauthioWeb.OAuth.popup(loginTo).done(function (instagram) {
+            _oauthioWeb.OAuth.popup(loginTo).then(function (instagram) {
                 console.log('instagram:', instagram);
                 instagram.me().then(function (data) {
                     console.log('me data:', data);
@@ -75,7 +75,7 @@ var App = function (_React$Component) {
                     console.log('self data:', data);
                 });
             }).fail(function (ex) {
-                console.log(ex);
+                console.warn(ex);
             });
         }
     }, {
@@ -86,7 +86,7 @@ var App = function (_React$Component) {
                 { className: 'follow-container' },
                 _react2.default.createElement(
                     'a',
-                    { id: 'instagram-button', className: 'btn btn-block btn-social btn-instagram', onClick: this.openPopup },
+                    { id: 'instagram-button', className: 'btn btn-block btn-social btn-instagram', onClick: this.onLogin },
                     _react2.default.createElement('i', { className: 'fa fa-instagram' }),
                     ' Sign in with Instagram'
                 )

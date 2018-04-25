@@ -25,13 +25,13 @@ class App extends React.Component {
         return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
     }
 
-    onLogin(){
-        let publicKey = 'MvD4ZgHXi44YuPQSRRNApEuQDc4';
+    onLogin() {
+        console.log('ádd');
+        let publicKey = '1q65G1o9uDePDgZXhIt7xEgaL-A'; //demo
         let loginTo = 'instagram';
-        let redirectUri=this.state.redirectUri;
         OAuth.initialize(publicKey);
 
-        OAuth.popup(loginTo).done(instagram => {
+        OAuth.popup(loginTo).then(instagram => {
             console.log('instagram:', instagram);
             instagram.me().then(data => {
                 console.log('me data:', data);
@@ -41,12 +41,16 @@ class App extends React.Component {
             instagram.get('/v1/users/self').then(data => {
                 console.log('self data:', data);
             })
-        }).fail((ex)=>{console.log(ex)});
+        }).fail((ex) => {
+            console.warn(ex)
+        })
     }
+
     render() {
         return (
             <div className="follow-container">
-                <a id="instagram-button" className="btn btn-block btn-social btn-instagram" onClick={this.openPopup}>
+
+                <a id="instagram-button" className="btn btn-block btn-social btn-instagram" onClick={this.onLogin}>
                     <i className="fa fa-instagram"/> Sign in with Instagram
                 </a>
             </div>

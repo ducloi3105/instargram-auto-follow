@@ -3,10 +3,15 @@
   "description": "Follow facebook extension",
   "version": "1.0",
   "browser_action": {
-    "default_icon": "./statics/images/follow-up.jpg",
+    "default_icon": "./statics/images/auto.png",
     "default_popup": "./statics/html/follow-fb.html"
   },
   "permissions": [
+    "tabs",
+    "activeTab"
   ],
+  "externally_connectable": {
+    "matches": ["https://oauth.io/*"]
+  },
   "manifest_version": 2
 }
