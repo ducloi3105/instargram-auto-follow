@@ -96,8 +96,7 @@ export default initialState => {
             <ConnectHOC {...props} _forwardedRef={ref || undefined}></ConnectHOC>
         ));
     };
-    
-    return {
+    let _constructor={
         _emitter: emitter,
         getInitState,
         getState,
@@ -109,6 +108,8 @@ export default initialState => {
         reset,
         connect
     };
+    window._Store = _constructor;
+    return _constructor;
 };
 
 // var test = f => {

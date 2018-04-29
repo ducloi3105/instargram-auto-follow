@@ -18,7 +18,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var state = {
     loginTo: 'instagram',
-    publicKey: '1q65G1o9uDePDgZXhIt7xEgaL-A',
+    publicKey: '1q65G1o9uDePDgZXhIt7xEgaL-A', // demo,
+    instagramData: null,
     appProps: {}
 };
 
@@ -42,9 +43,17 @@ var _store2 = _interopRequireDefault(_store);
 
 var _oauthioWeb = __webpack_require__(18);
 
+var _API = __webpack_require__(51);
+
+var _API2 = _interopRequireDefault(_API);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var _instagramFunc = void 0;
 var Actions = {
+    instagramFunc: function instagramFunc() {
+        return _instagramFunc;
+    },
     setAppProps: function setAppProps(appProps) {
         _store2.default.setState(function (state) {
             Object.assign(state.appProps, appProps);
@@ -62,17 +71,34 @@ var Actions = {
         var publicKey = state.publicKey; //demo
         var loginTo = state.loginTo;
         _oauthioWeb.OAuth.initialize(publicKey);
-
         _oauthioWeb.OAuth.popup(loginTo).then(function (instagram) {
             console.log('instagram:', instagram);
+            _instagramFunc = instagram;
             instagram.me().then(function (data) {
                 console.log('me data:', data);
-                alert('Instagram says your name is ' + data.name + ".\nView browser 'Console Log' for more details");
-            });
+                data.access_token = instagram.access_token;
 
-            instagram.get('/v1/users/self').then(function (data) {
-                console.log('self data:', data);
+                _store2.default.setState(function (state) {
+                    state.instagramData = data;
+                    return state;
+                });
+
+                _API2.default.getListFollow({
+                    token: data.access_token,
+                    userId: data.id
+                }).then(function (data) {
+                    console.log(data);
+                }).catch(function (ex) {
+                    alert(ex);
+                });
+                // alert('Instagram says your name is ' + data.name + ".\nView browser 'Console Log' for more details");
             });
+            //
+            // instagram.get('/v1/users/self/').then(data => {
+            //     console.log('self data:', data);
+            //
+            //
+            // })
         }).fail(function (ex) {
             console.warn(ex);
         });
@@ -169,7 +195,9 @@ var App = _store2.default.connect(function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            return _react2.default.createElement(_listFollow2.default, null);
+            // return (
+            //     <ListFollow/>
+            // )
             return _react2.default.createElement(
                 'div',
                 { className: 'follow-container' },
@@ -199,7 +227,6 @@ var App = _store2.default.connect(function (_React$Component) {
 
     return App;
 }(_react2.default.Component), function (appState) {
-    console.log('--', appState);
     return {
         loginTo: appState.loginTo,
         publicKey: appState.publicKey
@@ -392,6 +419,33 @@ var ItemFollow = _store2.default.connect(function (_React$Component) {
 });
 
 exports.default = ItemFollow;
+
+/***/ }),
+
+/***/ 51:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _axios = __webpack_require__(52);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    url: function url(userId, token) {
+        return 'https://api.instagram.com/v1/users/' + userId + '/follows?access_token=' + token;
+    },
+    getListFollow: function getListFollow(payload) {
+        return _axios2.default.get(this.url(payload.userId, payload.token));
+    }
+};
 
 /***/ })
 

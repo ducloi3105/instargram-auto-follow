@@ -3,7 +3,7 @@ import ReactDom from 'react-dom';
 import {OAuth} from 'oauthio-web';
 import Store from "./flux/store";
 import Action from "./flux/actions";
-import ListFollow from './components/list-follow'
+import ListFollow from './components/list-follow';
 
 const App = Store.connect(class App extends React.Component {
     constructor() {
@@ -42,9 +42,9 @@ const App = Store.connect(class App extends React.Component {
     }
 
     render() {
-        return (
-            <ListFollow/>
-        )
+        // return (
+        //     <ListFollow/>
+        // )
         return (
             <div className="follow-container">
                 <h1 className="follow-icon follow-icon-instagram">
@@ -69,7 +69,6 @@ const App = Store.connect(class App extends React.Component {
         return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
     }
 }, appState => {
-    console.log('--', appState);
     return {
         loginTo: appState.loginTo,
         publicKey: appState.publicKey

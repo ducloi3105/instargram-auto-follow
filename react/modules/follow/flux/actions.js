@@ -1,7 +1,12 @@
 import Store from './store';
 import {OAuth} from "oauthio-web";
+import API from '../API'
 
+let instagramFunc;
 const Actions = {
+    instagramFunc() {
+        return instagramFunc;
+    },
     setAppProps(appProps) {
         Store.setState(state => {
             Object.assign(state.appProps, appProps);
@@ -19,17 +24,34 @@ const Actions = {
         let publicKey = state.publicKey; //demo
         let loginTo = state.loginTo;
         OAuth.initialize(publicKey);
-
         OAuth.popup(loginTo).then(instagram => {
             console.log('instagram:', instagram);
+            instagramFunc = instagram;
             instagram.me().then(data => {
                 console.log('me data:', data);
-                alert('Instagram says your name is ' + data.name + ".\nView browser 'Console Log' for more details");
-            });
+                data.access_token = instagram.access_token;
 
-            instagram.get('/v1/users/self').then(data => {
-                console.log('self data:', data);
-            })
+                Store.setState(state => {
+                    state.instagramData = data;
+                    return state;
+                });
+
+                API.getListFollow({
+                    token: data.access_token,
+                    userId: data.id
+                }).then((data) => {
+                    console.log(data)
+                }).catch((ex) => {
+                    alert(ex)
+                });
+                // alert('Instagram says your name is ' + data.name + ".\nView browser 'Console Log' for more details");
+            });
+            //
+            // instagram.get('/v1/users/self/').then(data => {
+            //     console.log('self data:', data);
+            //
+            //
+            // })
         }).fail((ex) => {
             console.warn(ex)
         })
