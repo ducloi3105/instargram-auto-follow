@@ -1,6 +1,6 @@
 webpackJsonp([0],{
 
-/***/ 35:
+/***/ 38:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24,15 +24,15 @@ var _actions = __webpack_require__(7);
 
 var _actions2 = _interopRequireDefault(_actions);
 
-var _login = __webpack_require__(37);
+var _login = __webpack_require__(40);
 
 var _login2 = _interopRequireDefault(_login);
 
-var _Otp = __webpack_require__(38);
+var _Otp = __webpack_require__(41);
 
 var _Otp2 = _interopRequireDefault(_Otp);
 
-var _validateOtp = __webpack_require__(39);
+var _validateOtp = __webpack_require__(42);
 
 var _validateOtp2 = _interopRequireDefault(_validateOtp);
 
@@ -107,7 +107,7 @@ window.React.renderLoginForm = function (props) {
 
 /***/ }),
 
-/***/ 36:
+/***/ 39:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -279,7 +279,43 @@ exports.default = {
 
 /***/ }),
 
-/***/ 37:
+/***/ 4:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createStore = __webpack_require__(10);
+
+var _createStore2 = _interopRequireDefault(_createStore);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var state = {
+    txtUserName: '',
+    txtPassWords: '',
+    txtCaptcha: '',
+    chkSavePassword: false,
+    errorMessage: '',
+    processing: false,
+    captchaImg: '',
+    skin: 'skin-' + Math.floor(Math.random() * 8 + 1),
+    formType: 'login',
+    qrImg: '',
+    otpType: 'QRCode',
+    otpCode: '',
+    appProps: {}
+};
+
+exports.default = (0, _createStore2.default)(state);
+
+/***/ }),
+
+/***/ 40:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -413,7 +449,7 @@ exports.default = Login;
 
 /***/ }),
 
-/***/ 38:
+/***/ 41:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -549,7 +585,7 @@ exports.default = Opt;
 
 /***/ }),
 
-/***/ 39:
+/***/ 42:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -668,42 +704,6 @@ exports.default = Opt;
 
 /***/ }),
 
-/***/ 4:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createStore = __webpack_require__(16);
-
-var _createStore2 = _interopRequireDefault(_createStore);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var state = {
-    txtUserName: '',
-    txtPassWords: '',
-    txtCaptcha: '',
-    chkSavePassword: false,
-    errorMessage: '',
-    processing: false,
-    captchaImg: '',
-    skin: 'skin-' + Math.floor(Math.random() * 8 + 1),
-    formType: 'login',
-    qrImg: '',
-    otpType: 'QRCode',
-    otpCode: '',
-    appProps: {}
-};
-
-exports.default = (0, _createStore2.default)(state);
-
-/***/ }),
-
 /***/ 7:
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -718,7 +718,7 @@ var _store = __webpack_require__(4);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _api = __webpack_require__(36);
+var _api = __webpack_require__(39);
 
 var _api2 = _interopRequireDefault(_api);
 
@@ -911,4 +911,4 @@ exports.default = Actions;
 
 /***/ })
 
-},[35]);
+},[38]);

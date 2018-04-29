@@ -4,7 +4,7 @@ let app = express();
 app.use(express.static('statics'));
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + "/statics/html/follow-fb.html");
+    res.sendFile(__dirname + "/statics/html/follow-instagram.html");
 });
 
 let server = app.listen(1234, function () {

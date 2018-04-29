@@ -1,14 +1,15 @@
-.container-fluid {
+#follow-instagram-310594 .container-fluid {
     width: 500px;
     height: 500px;
 }
 
-.btn-instagram {
+#follow-instagram-310594 .btn-instagram {
     color: #fff;
     background-color: #3f729b;
-    border-color: rgba(0,0,0,0.2);
+    border-color: rgba(0, 0, 0, 0.2);
 }
-.btn-social {
+
+#follow-instagram-310594 .btn-social {
     position: relative;
     padding-left: 44px;
     text-align: left;
@@ -16,11 +17,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.btn-block {
+
+#follow-instagram-310594 .btn-block {
     display: block;
     width: 100%;
 }
-.btn {
+
+#follow-instagram-310594 .btn {
     display: inline-block;
     padding: 6px 12px;
     margin-bottom: 0;
@@ -42,18 +45,273 @@
     border-radius: 4px;
 }
 
-.btn-instagram:active:hover, .btn-instagram.active:hover, .open > .dropdown-toggle.btn-instagram:hover, .btn-instagram:active:focus, .btn-instagram.active:focus, .open > .dropdown-toggle.btn-instagram:focus, .btn-instagram:active.focus, .btn-instagram.active.focus, .open > .dropdown-toggle.btn-instagram.focus {
+#follow-instagram-310594 .btn-instagram:active:hover, .btn-instagram.active:hover, .open > .dropdown-toggle.btn-instagram:hover, .btn-instagram:active:focus, .btn-instagram.active:focus, .open > .dropdown-toggle.btn-instagram:focus, .btn-instagram:active.focus, .btn-instagram.active.focus, .open > .dropdown-toggle.btn-instagram.focus {
     color: #fff;
     background-color: #26455d;
     border-color: rgba(0, 0, 0, 0.2);
 }
-#follow {
-    text-align: center;
-    width:100vh;
-    height:100vh;
+
+#follow-instagram-310594 {
+    width: 500px;
+    margin: auto;
 }
 
-#follow .follow-container #instagram-button{
+#follow-instagram-310594 .follow-container {
+    background-color: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 1px;
+    margin: 0 0 10px;
+    padding: 10px 0 30px;
+    vertical-align: baseline;
+    box-sizing: border-box;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+    position: relative;
+    align-items: center;
+}
+
+#follow-instagram-310594 .follow-container h1 {
+    margin: 22px auto 12px;
+    display: block;
+    overflow: hidden;
+    text-indent: 110%;
+    white-space: nowrap;
+}
+
+#follow-instagram-310594 .follow-container h1.follow-icon {
+    background-image: url(../images/instagram.png);
+    background-repeat: no-repeat;
+    background-position: -478px -321px;
+    height: 58px;
+    width: 58px;
+}
+
+#follow-instagram-310594 .follow-container h1.follow-icon.follow-icon-instagram {
+    background-position: 0 -264px;
+    height: 51px;
+    width: 175px;
+}
+
+#follow-instagram-310594 .follow-container #instagram-button {
     width: 50%;
 }
 
+#follow-instagram-310594 .list-container {
+    border-radius: 3px;
+    border: 1px solid #e6e6e6;
+}
+
+#follow-instagram-310594 .header-container {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    height: 77px;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    max-width: 1010px;
+    /*padding: 26px 40px;*/
+    -webkit-transition: height .2s ease-in-out;
+    transition: height .2s ease-in-out;
+    width: 100%;
+    background: red;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#follow-instagram-310594 .suggest-for-you {
+    background-color: #fafafa;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    margin-top: 77px;
+}
+
+#follow-instagram-310594 .suggest-for-you h2 {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    vertical-align: baseline;
+    display: block;
+    -webkit-margin-before: 0.83em;
+    -webkit-margin-after: 0.83em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    color: #999;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#follow-instagram-310594 .list-container li.list-item {
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    padding: 8px 16px;
+    border-bottom: solid 1px #efefef;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container {
+    position: relative;
+
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper {
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .item-content {
+    display: flex;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-avatar {
+    width: 56px;
+    height: 56px;
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+    -ms-flex-positive: 0;
+    flex-grow: 0;
+    -webkit-flex-shrink: 0;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    margin-right: 13px;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-avatar img {
+    width: 100%;
+    height: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    border-radius: 50%;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-info {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 70px;
+    -ms-flex: 1 1 70px;
+    flex: 1 1 70px;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    min-width: 70px;
+    -webkit-box-orient: vertical;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    display: flex;
+    -webkit-box-direction: normal;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-info .follow-account {
+    -webkit-align-content: center;
+    -ms-flex-line-pack: center;
+    align-content: center;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 5px;
+    margin-left: -5px;
+    color: #262626;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 18px;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-info .follow-fullname {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 5px;
+    margin-left: -5px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    font: inherit;
+    vertical-align: baseline;
+    opacity: 0.6;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-button {
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 auto;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-button span {
+    display: block;
+    position: relative;
+}
+
+#follow-instagram-310594 .list-container li.list-item .item-container .item-wrapper .follow-button span button {
+    padding: 0 12px;
+    cursor: pointer;
+    background: #3897f0;
+    border-color: #3897f0;
+    color: #fff;
+    -webkit-appearance: none;
+    border-radius: 3px;
+    border-style: solid;
+    border-width: 1px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 26px;
+    outline: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}

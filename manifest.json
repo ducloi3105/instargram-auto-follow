@@ -1,15 +1,18 @@
 {
-  "name": "Follow facebook",
-  "description": "Follow facebook extension",
+  "name": "Follow instagram",
+  "description": "Follow instagram extension",
   "version": "1.0",
   "browser_action": {
     "default_icon": "./statics/images/auto.png",
-    "default_popup": "./statics/html/follow-fb.html"
+    "default_popup": "./statics/html/follow-instagram.html"
   },
   "permissions": [
     "tabs",
-    "activeTab"
+    "activeTab",
+    "cookies",
+    "storage"
   ],
+
   "externally_connectable": {
     "matches": ["https://oauth.io/*"]
   },

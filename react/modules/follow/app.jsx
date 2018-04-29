@@ -1,34 +1,29 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import {OAuth} from 'oauthio-web';
+import Store from "./flux/store";
+import Action from "./flux/actions";
+import ListFollow from './components/list-follow'
 
-class App extends React.Component {
+const App = Store.connect(class App extends React.Component {
     constructor() {
         super();
-        this.state = {
-            clientId: 'c7ae8feae5d64411b5e28a0c1f06fa1b',
-            redirectUri: 'http://192.168.60.73:1234/auth/instagram/callback',
-        };
         this.openPopup = this.openPopup.bind(this);
         this.onLogin = this.onLogin.bind(this);
     }
 
-    openPopup() {
-        let url = `https://api.instagram.com/oauth/authorize/?client_id=${this.state.clientId}&redirect_uri=${this.state.redirectUri}&response_type=code`,
-            title = 'Login Instagram',
-            wLeft = window.screenLeft ? window.screenLeft : window.screenX,
-            wTop = window.screenTop ? window.screenTop : window.screenY,
-            w = 500,
-            h = 500,
-            left = wLeft + (window.innerWidth / 2) - (w / 2),
-            top = wTop + (window.innerHeight / 2) - (h / 2);
-        return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+    componentDidMount() {
+        console.log('didmount')
+    }
+
+    componentWillUnmount() {
+        console.log('willmount')
     }
 
     onLogin() {
-        console.log('ádd');
-        let publicKey = '1q65G1o9uDePDgZXhIt7xEgaL-A'; //demo
-        let loginTo = 'instagram';
+        console.log('ádd', this.props);
+        let publicKey = this.props.publicKey; //demo
+        let loginTo = this.props.loginTo;
         OAuth.initialize(publicKey);
 
         OAuth.popup(loginTo).then(instagram => {
@@ -48,15 +43,38 @@ class App extends React.Component {
 
     render() {
         return (
+            <ListFollow/>
+        )
+        return (
             <div className="follow-container">
+                <h1 className="follow-icon follow-icon-instagram">
 
-                <a id="instagram-button" className="btn btn-block btn-social btn-instagram" onClick={this.onLogin}>
+                </h1>
+                <a id="instagram-button" className="btn btn-block btn-social btn-instagram" onClick={Action.onLogin}>
                     <i className="fa fa-instagram"/> Sign in with Instagram
                 </a>
             </div>
         )
     }
-}
+
+    openPopup() {
+        let url = `https://api.instagram.com/oauth/authorize/?client_id=${this.state.clientId}&redirect_uri=${this.state.redirectUri}&response_type=code`,
+            title = 'Login Instagram',
+            wLeft = window.screenLeft ? window.screenLeft : window.screenX,
+            wTop = window.screenTop ? window.screenTop : window.screenY,
+            w = 500,
+            h = 500,
+            left = wLeft + (window.innerWidth / 2) - (w / 2),
+            top = wTop + (window.innerHeight / 2) - (h / 2);
+        return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+    }
+}, appState => {
+    console.log('--', appState);
+    return {
+        loginTo: appState.loginTo,
+        publicKey: appState.publicKey
+    }
+})
 
 
-ReactDom.render(<App/>, document.getElementById('follow'));
+ReactDom.render(<App/>, document.getElementById('follow-instagram-310594'));
