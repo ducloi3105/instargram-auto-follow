@@ -108,7 +108,7 @@ export default initialState => {
         reset,
         connect
     };
-    window._Store = _constructor;
+    window._StoreObject = _constructor;
     return _constructor;
 };
 

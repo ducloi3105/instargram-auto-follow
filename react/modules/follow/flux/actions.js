@@ -42,7 +42,10 @@ const Actions = {
                 }).then((data) => {
                     console.log(data)
                 }).catch((ex) => {
-                    alert(ex)
+                    console.log(ex)
+                    if(ex.response){
+                        console.log(ex.response)
+                    }
                 });
                 // alert('Instagram says your name is ' + data.name + ".\nView browser 'Console Log' for more details");
             });
@@ -55,6 +58,23 @@ const Actions = {
         }).fail((ex) => {
             console.warn(ex)
         })
+    },
+
+    getUserIdFromUrl(){
+        let href = '';
+        let url = window.location.origin;
+        let userName = window.location.pathname.split('/');
+        if (userName.length > 1) {
+            userName = userName[1];
+            href = url + '/' + userName;
+            API.getUserIdFromUrl(href).then(data=>{
+                data = JSON.parse(data.split("window._sharedData = ")[1].split(";</script>")[0]).entry_data.ProfilePage[0].graphql;
+                console.log(data);
+            }).catch(ex=>{
+                console.warn('Get userid faile: ',ex)
+            })
+
+        }
     }
 };
 

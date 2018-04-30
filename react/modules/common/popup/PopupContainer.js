@@ -1,10 +1,9 @@
 import './style.styl'
 import React from 'react'
-import {RComponent} from './../r-component.js'
 import PopupItem from './PopupItem.js'
 import {CSSTransition, TransitionGroup} from "react-transition-group";
 
-export default class PopupContainer extends RComponent {
+export default class PopupContainer extends React.Component {
     constructor(props, context) {
         super(props, context)
 
@@ -14,11 +13,13 @@ export default class PopupContainer extends RComponent {
             this.forceUpdate();
         }))
     }
-
+    componentDidMount(){
+        console.log('css')
+    }
     render() {
-        var popupItems;
+        let popupItems;
         const {popupService} = this.props;
-        var popupData = popupService.getData();
+        let popupData = popupService.getData();
 
         if (popupData && popupData.length) {
             popupItems = popupData.map(item =>

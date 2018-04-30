@@ -40,6 +40,10 @@ let getImsModules = () => {
     }, []);
 };
 
+const cssLoader = ["style-loader", "css-loader", "postcss-loader"]
+
+const stylLoader = ["style-loader", "css-loader", "stylus-loader", "postcss-loader"]
+
 let WebpackConfig = (env, noWatch) => {
     let entry = getImsModules().reduce((entries, module) => {
         let outputPath = relPath(resolvePath(CONFIG.outputFolder, module));
@@ -67,9 +71,12 @@ let WebpackConfig = (env, noWatch) => {
                         presets: ["env", "react"],
                     }
                 }
-            }, {
+            },{
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                use: cssLoader
+            }, {
+                test: /\.styl$/,
+                use: stylLoader
             }],
         },
         resolve: {

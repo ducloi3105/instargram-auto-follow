@@ -1,6 +1,6 @@
-webpackJsonp([1],{
+webpackJsonp([2],{
 
-/***/ 11:
+/***/ 10:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10,7 +10,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createStore = __webpack_require__(10);
+var _createStore = __webpack_require__(9);
 
 var _createStore2 = _interopRequireDefault(_createStore);
 
@@ -27,7 +27,7 @@ exports.default = (0, _createStore2.default)(state);
 
 /***/ }),
 
-/***/ 19:
+/***/ 14:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37,13 +37,13 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _store = __webpack_require__(11);
+var _store = __webpack_require__(10);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _oauthioWeb = __webpack_require__(18);
+var _oauthioWeb = __webpack_require__(13);
 
-var _API = __webpack_require__(51);
+var _API = __webpack_require__(47);
 
 var _API2 = _interopRequireDefault(_API);
 
@@ -89,7 +89,10 @@ var Actions = {
                 }).then(function (data) {
                     console.log(data);
                 }).catch(function (ex) {
-                    alert(ex);
+                    console.log(ex);
+                    if (ex.response) {
+                        console.log(ex.response);
+                    }
                 });
                 // alert('Instagram says your name is ' + data.name + ".\nView browser 'Console Log' for more details");
             });
@@ -102,6 +105,21 @@ var Actions = {
         }).fail(function (ex) {
             console.warn(ex);
         });
+    },
+    getUserIdFromUrl: function getUserIdFromUrl() {
+        var href = '';
+        var url = window.location.origin;
+        var userName = window.location.pathname.split('/');
+        if (userName.length > 1) {
+            userName = userName[1];
+            href = url + '/' + userName;
+            _API2.default.getUserIdFromUrl(href).then(function (data) {
+                data = JSON.parse(data.split("window._sharedData = ")[1].split(";</script>")[0]).entry_data.ProfilePage[0].graphql;
+                console.log(data);
+            }).catch(function (ex) {
+                console.warn('Get userid faile: ', ex);
+            });
+        }
     }
 };
 
@@ -109,7 +127,7 @@ exports.default = Actions;
 
 /***/ }),
 
-/***/ 36:
+/***/ 46:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -121,21 +139,21 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(9);
+var _reactDom = __webpack_require__(5);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _oauthioWeb = __webpack_require__(18);
+var _oauthioWeb = __webpack_require__(13);
 
-var _store = __webpack_require__(11);
+var _store = __webpack_require__(10);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _actions = __webpack_require__(19);
+var _actions = __webpack_require__(14);
 
 var _actions2 = _interopRequireDefault(_actions);
 
-var _listFollow = __webpack_require__(37);
+var _listFollow = __webpack_require__(66);
 
 var _listFollow2 = _interopRequireDefault(_listFollow);
 
@@ -237,7 +255,40 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
 
 /***/ }),
 
-/***/ 37:
+/***/ 47:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _axios = __webpack_require__(23);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    url: function url(userId, token) {
+        var first = 12;
+        var id = "7094217709"; // user ID
+        var query_hash = "37479f2b8209594dde7facb0d904896a";
+        return "https://www.instagram.com/graphql/query/?query_hash=" + query_hash + "&variables={\"id\":\"" + id + "\",\"first\":" + first + "}";
+    },
+    getListFollow: function getListFollow(payload) {
+        return _axios2.default.get(encodeURI(this.url(payload.userId, payload.token)));
+    },
+    getUserIdFromUrl: function getUserIdFromUrl(url) {
+        return _axios2.default.get(url);
+    }
+};
+
+/***/ }),
+
+/***/ 66:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -249,11 +300,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _store = __webpack_require__(11);
+var _store = __webpack_require__(10);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _actions = __webpack_require__(19);
+var _actions = __webpack_require__(14);
 
 var _actions2 = _interopRequireDefault(_actions);
 
@@ -261,7 +312,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _itemFollow = __webpack_require__(43);
+var _itemFollow = __webpack_require__(67);
 
 var _itemFollow2 = _interopRequireDefault(_itemFollow);
 
@@ -318,7 +369,7 @@ exports.default = ListFollow;
 
 /***/ }),
 
-/***/ 43:
+/***/ 67:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -330,11 +381,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _store = __webpack_require__(11);
+var _store = __webpack_require__(10);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _actions = __webpack_require__(19);
+var _actions = __webpack_require__(14);
 
 var _actions2 = _interopRequireDefault(_actions);
 
@@ -420,33 +471,6 @@ var ItemFollow = _store2.default.connect(function (_React$Component) {
 
 exports.default = ItemFollow;
 
-/***/ }),
-
-/***/ 51:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _axios = __webpack_require__(52);
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-    url: function url(userId, token) {
-        return 'https://api.instagram.com/v1/users/' + userId + '/follows?access_token=' + token;
-    },
-    getListFollow: function getListFollow(payload) {
-        return _axios2.default.get(this.url(payload.userId, payload.token));
-    }
-};
-
 /***/ })
 
-},[36]);
+},[46]);

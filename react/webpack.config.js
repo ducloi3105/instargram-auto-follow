@@ -10,6 +10,11 @@ let BLACKLIST = [
     'common'
 ];
 let moduleName = 'modules';
+
+const cssLoader = ["style-loader", "css-loader", "postcss-loader"]
+
+const stylLoader = ["style-loader", "css-loader", "stylus-loader", "postcss-loader"]
+
 module.exports = (env) => {
     return {
 
@@ -59,15 +64,12 @@ module.exports = (env) => {
                             presets: ["env", "react"]
                         }
                     }
-                },
-                {
+                },{
                     test: /\.css$/,
-                    // use: ExtractTextPlugin.extract({
-                    //     publicPath: __dirname + '/../',
-                    //     fallback: "style-loader",
-                    //     use: "css-loader"
-                    // })
-                    use: ['style-loader', 'css-loader']
+                    use: cssLoader
+                }, {
+                    test: /\.styl$/,
+                    use: stylLoader
                 }
             ],
         },

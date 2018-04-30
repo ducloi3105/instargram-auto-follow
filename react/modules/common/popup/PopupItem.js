@@ -1,8 +1,7 @@
 import React from 'react'
-import {RComponent} from './../r-component.js'
 import {safeInvoke} from '../../utils/function-util.js'
 
-export default class PopupItem extends RComponent {
+export default class PopupItem extends React.Component {
     constructor(props, context) {
         super(props, context);
         this.close = this.close.bind(this)
