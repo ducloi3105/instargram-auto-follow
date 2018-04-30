@@ -61,13 +61,13 @@ body, button, input, textarea {
     outline: 0;
     overflow: hidden;
     position: absolute;
-    right: 0;
-    top: 0;
+    right: -10px;
+    top: -15px;
     z-index: 100000;
 }
 
 #show-follow-instagram-popup .popup-container .close-popup::before {
-    color: #fff;
+    color: black;
     content: '\00D7';
     display: block;
     font-size: 36px;
@@ -77,13 +77,165 @@ body, button, input, textarea {
     margin: 0;
 }
 
-
 #follow-instagram-310594 .follow-container {
-    width: 40px;
-    height: 40px;
+    /*width: 40px;*/
+    /*height: 40px;*/
     position: fixed;
-    top: 12px;
-    left: 0px;
+    top: 150px;
+    left: 10px;
     /*background-image: url(../../../../statics/images/instagram_white.png);*/
-    background: red;
+    background-image: url(/static/bundles/base/sprite_core.png/b32d382b99a8.png);
+    background-repeat: no-repeat;
+    background-position: -395px -430px;
+    height: 30px;
+    width: 30px;
+    cursor:pointer;
+}
+
+._5rnaq .follow-container {
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: inline-block;
+    background-size: contain;
+    margin: -12px 10px 0px 0px;
+    background-image: url(/static/bundles/base/sprite_core.png/b32d382b99a8.png);
+    top: 0;
+}
+
+#show-follow-instagram-popup #BotInjectedContainer {
+    display: flex;
+    vertical-align: baseline;
+    background-color: rgb(254, 254, 254);
+    position: fixed;
+    width: 98%;
+    top: 3%;
+    left: 1%;
+    z-index: 9999;
+    height: 94%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    resize: both;
+    margin: 0px;
+    font: inherit;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(204, 204, 204);
+    border-image: initial;
+    padding: 1%;
+}
+
+#BotInjectedContainer .container-wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-grow: 1;
+    /*overflow-x: auto;*/
+    /*overflow-y: hidden;*/
+
+}
+
+#BotInjectedContainer .container-wrapper .header-wrap {
+    height: 50px;
+    display: flex;
+    flex-grow: 1;
+}
+
+#BotInjectedContainer .container-wrapper .header-wrap h1 {
+    font-size: 28px;
+    line-height: 28px;
+    font-weight: bold;
+    margin: 0 0 10px;
+}
+
+#BotInjectedContainer .content-wrap {
+    display: flex;
+    flex-grow: 1;
+    height: calc(100% - 77px);
+    flex-direction: row;
+}
+
+#BotInjectedContainer .content-wrap .left-panel-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: calc(100% - 320px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#BotInjectedContainer .content-wrap .list-item {
+    width: 245px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    margin: 0;
+    height: 66px;
+}
+
+#BotInjectedContainer .content-wrap .list-item img.avatar {
+    width: 50px;
+    height: 50px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: white;
+    border-image: initial;
+    border-radius: 10px;
+    margin: 0 3px 0 0;
+}
+
+#BotInjectedContainer .content-wrap .list-item .info-user {
+    width: 100%;
+}
+
+#BotInjectedContainer .content-wrap .list-item .info-user a {
+    color: #003569;
+    text-decoration: none;
+}
+
+#BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media only screen and (max-width: 820px) {
+    #BotInjectedContainer .content-wrap {
+        flex-direction: column;
+        overflow: auto;
+    }
+
+    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+
+}
+
+#BotInjectedContainer .content-wrap .right-panel-wrapper {
+    width: 300px;
+    min-width: 300px;
+    background: blue;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    min-height: 100%;
+}
+
+.multi-actions-button{
+    text-align: center;
+    color: white;
+    background-color: green;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin: 5px 0px;
+    border-radius: 3px;
+    padding: 8px 0px;
 }

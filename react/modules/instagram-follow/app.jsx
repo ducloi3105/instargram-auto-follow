@@ -42,7 +42,7 @@ const App = Store.connect(class App extends React.Component {
 
     render() {
         return (
-            <div className="follow-container" onClick={this.showPopup}/>
+            <div className="follow-container" onClick={this.showPopup} title="Automation for Instagram™"/>
         )
     }
 }, appState => {
@@ -52,8 +52,9 @@ const App = Store.connect(class App extends React.Component {
     }
 });
 
-let iDiv = document.createElement('div');
-
-iDiv.id = 'follow-instagram-310594';
-document.getElementsByTagName('body')[0].appendChild(iDiv);
+if (!document.getElementById('follow-instagram-310594')) {
+    let iDiv = document.createElement('div');
+    iDiv.id = 'follow-instagram-310594';
+    document.getElementsByTagName('body')[0].appendChild(iDiv);
+}
 ReactDom.render(<App/>, document.getElementById('follow-instagram-310594'));

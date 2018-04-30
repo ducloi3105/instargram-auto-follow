@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import Store from "../flux/store";
 import Action from "../flux/actions";
+import LeftPanelItem from './left-panel-item';
+import RightPanel from './right-panel-wrapper';
 
 class PopupContainer extends React.Component {
     constructor() {
@@ -12,16 +14,8 @@ class PopupContainer extends React.Component {
         this.closePopup = this.closePopup.bind(this)
     }
 
-    componentDidMount() {
-        console.log('didmount')
-    }
-
     componentWillReceiveProps(nextProps) {
-        if (nextProps.display != this.state.display) this.setState({display: nextProps.display})
-    }
-
-    componentWillUnmount() {
-        console.log('willmount')
+        if (nextProps.display !== this.state.display) this.setState({display: nextProps.display})
     }
 
     closePopup() {
@@ -30,8 +24,20 @@ class PopupContainer extends React.Component {
 
     render() {
         return (
-            <div className="popup-container" style={{display:this.state.display}}>
-                <button className="close-popup" onClick={this.closePopup}>Đóng</button>
+            <div className="popup-container" style={{display: this.state.display}}>
+                <div id="BotInjectedContainer">
+                    <div className="container-wrapper">
+                        <div className="header-wrap">
+                            <h1>Automation for Instagram™</h1>
+                            <button className="close-popup" onClick={this.closePopup}/>
+                        </div>
+                        <div className="content-wrap">
+                            <LeftPanelItem/>
+
+                            <RightPanel/>
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }
