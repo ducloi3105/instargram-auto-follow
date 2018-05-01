@@ -17,15 +17,30 @@ let state = {
     filter: {
         limit: 1000,
         pageSize: 48,
+        showFollowers: {
+            min: 0,
+            max: 7500,
+            minStep: 0,
+            maxStep: 7500
+        },
+        keywords: '',
+        showFollowed: true,
+        hideFollowed: false,
+    },
+    configure: {
+        is_random: true,
         random_wait: 25,
         wait_between_actions: 25,
-        wait_minus_after_sort_: 10,
-        wait_hours_after_hard: 1,
+        wait_minus_after_sort: 10,
+        countFollow: 0
     },
     dataFollow: {
         listUser: [],
         total: 0
-    }
+    },
+    loading_get_list_user: false,
+    loading_follow_list_user: false,
+
 
 };
 

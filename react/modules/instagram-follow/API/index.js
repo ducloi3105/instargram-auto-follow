@@ -15,5 +15,19 @@ export default {
 
     getUserIdFromUrl(url) {
         return axios.get(url)
+    },
+
+    followAll(userId,token){
+        return axios.post(`https://www.instagram.com/web/friendships/${userId}/follow/`, null, {
+            headers: {
+                "x-csrftoken": token,
+                "x-instagram-ajax": 1,
+                "x-requested-with": "XMLHttpRequest"
+            }
+        })
+    },
+
+    getMoreDataUser(url) {
+        return axios.get(url)
     }
 }

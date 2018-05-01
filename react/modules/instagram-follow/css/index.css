@@ -89,7 +89,7 @@ body, button, input, textarea {
     background-position: -395px -430px;
     height: 30px;
     width: 30px;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 ._5rnaq .follow-container {
@@ -162,7 +162,7 @@ body, button, input, textarea {
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
-    max-width: calc(100% - 320px);
+    max-width: calc(100% - 400px);
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -173,8 +173,13 @@ body, button, input, textarea {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    margin: 0;
+    margin: 0 10px 10px 0;
     height: 66px;
+}
+
+#BotInjectedContainer .content-wrap .list-item.selected-item {
+    border: 2px solid red;
+    border-radius: 5%;
 }
 
 #BotInjectedContainer .content-wrap .list-item img.avatar {
@@ -192,13 +197,17 @@ body, button, input, textarea {
     width: 100%;
 }
 
+#BotInjectedContainer .content-wrap .list-item .info-avatar {
+    cursor: pointer;
+}
+
 #BotInjectedContainer .content-wrap .list-item .info-user a {
     color: #003569;
     text-decoration: none;
 }
 
 #BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {
-    width: 100%;
+    width: calc(100% - 60px);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -211,31 +220,76 @@ body, button, input, textarea {
     }
 
     #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper {
-        width: 100%;
-        max-width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
 }
 
-#BotInjectedContainer .content-wrap .right-panel-wrapper {
-    width: 300px;
-    min-width: 300px;
-    background: blue;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-start;
-    min-height: 100%;
-}
-
-.multi-actions-button{
+.multi-actions-button {
     text-align: center;
     color: white;
-    background-color: green;
+    background-color: #00807f;
     font-weight: bold;
     cursor: pointer;
     width: 100%;
-    margin: 5px 0px;
+    margin: 5px 0 15px 0;
     border-radius: 3px;
-    padding: 8px 0px;
+    padding: 8px 0;
+}
+
+#BotInjectedContainer .content-wrap .right-panel-wrapper {
+    width: 380px;
+    min-width: 380px;
+    display: flex;
+    min-height: 100%;
+    padding: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#BotInjectedContainer .content-wrap .right-panel-wrapper .config-options {
+    padding: 8px 0px 5px 10px;
+    border: 1px dashed rgb(204, 204, 204);
+    border-image: initial;
+    margin: 0 0 10px;
+}
+
+#BotInjectedContainer .row-info {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: unset;
+    align-items: center;
+    padding-right: 13px;
+}
+
+#BotInjectedContainer .row-info.input-range {
+    padding: 15px 20px 15px 6px;
+}
+
+#BotInjectedContainer .config-options .row-info input[type="number"] {
+    width: 50px;
+    margin: 0 5px;
+}
+#BotInjectedContainer .config-options .row-info input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+
+}
+
+#BotInjectedContainer input[type="text"], #BotInjectedContainer input[type="number"] {
+    width: 100%;
+    min-height: 30px;
+    border: 1px solid #b5b3b3;
+    border-radius: 4px;
+    padding: 5px 10px;
+    color: #333;
+    font: normal 13px Arial;
+    background-color: #fff;
+    display: block;
+    transition: border-color 0.2s ease-out;
+}
+
+.input-range__label {
+    color: #035a33 !important;
 }

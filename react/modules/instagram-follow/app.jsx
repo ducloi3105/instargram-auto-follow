@@ -14,7 +14,6 @@ const App = Store.connect(class App extends React.Component {
 
     componentDidMount() {
         Action.getInfoAccount();
-
     }
 
     handleGetSomeoneId(userUrl) {
@@ -24,7 +23,7 @@ const App = Store.connect(class App extends React.Component {
         }
 
         pathname = userUrl || pathname;
-        Action.getSomeone(pathname);
+        // Action.getSomeone(pathname);
 
     }
 
