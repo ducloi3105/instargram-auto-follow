@@ -25,12 +25,7 @@ class PopupContainer extends React.Component {
     render() {
         return (
             <div className="popup-container" style={{display: this.state.display}}>
-                <div className="progress"
-                     style={{
-                         width: "0%",
-                         opacity: 0
-                     }}
-                     data-v-634ff062=""/>
+
                 <div id="BotInjectedContainer">
                     <div className="container-wrapper">
                         <div className="header-wrap">
@@ -38,7 +33,15 @@ class PopupContainer extends React.Component {
                             <button className="close-popup" onClick={this.closePopup}/>
                         </div>
                         <div className="content-wrap">
-                            <LeftPanelItem/>
+                            <div className="left-wrap">
+                                <div className="progress"
+                                     style={{
+                                         width: "0%",
+                                         opacity: 0
+                                     }}
+                                     data-v-634ff062=""/>
+                                <LeftPanelItem/>
+                            </div>
 
                             <RightPanel/>
                         </div>
