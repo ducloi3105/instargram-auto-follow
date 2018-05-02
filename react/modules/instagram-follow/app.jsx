@@ -55,5 +55,14 @@ if (!document.getElementById('follow-instagram-310594')) {
     let iDiv = document.createElement('div');
     iDiv.id = 'follow-instagram-310594';
     document.getElementsByTagName('body')[0].appendChild(iDiv);
+
+    //add css
+    let head = document.getElementsByTagName('head')[0];
+    let link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';
+    link.media = 'all';
+    head.appendChild(link);
 }
 ReactDom.render(<App/>, document.getElementById('follow-instagram-310594'));

@@ -3,7 +3,7 @@ import ReactDom from 'react-dom';
 import Store from './flux/store';
 import Actions from './flux/actions';
 import Login from './components/login';
-import Otp from './components/Otp';
+import Otp from './components/otp';
 import ValidateOtp from './components/validate-otp';
 
 var App = Store.connect(class App extends React.Component {

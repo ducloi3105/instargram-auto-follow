@@ -29,6 +29,7 @@ const Actions = {
         Store.setState(state => {
             state.dataFollow.listUser = [];
             state.dataFollow.total = 0;
+            state.loading_get_list_user = true;
             return state;
         });
         this.getSomeone(userId)
@@ -48,18 +49,19 @@ const Actions = {
                         state.infoWho.id = info.id;
                     }
                 } catch (e) {
-                    state.infoWho.message = "Get someone id  failed";
-                    console.warn("Get someone id  failed")
+                    state.infoWho.message = "Get info account failed";
+                    alert("Get info account failed")
                 }
 
                 return state;
-            })
+            });
             this.getListFollow();
         }).catch(ex => {
-            console.warn("Get someone id  failed", ex);
+            alert("UserId incorrect");
             Store.setState(state => {
                 state.infoWho.username = '';
                 state.infoWho.id = '';
+                state.loading_get_list_user = false;
                 return state;
             })
         })
@@ -74,7 +76,7 @@ const Actions = {
         };
         if (after) payload.after = after;
         API.getListFollow(payload).then(data => {
-            if (data.status == 200) {
+            if (data.status === 200) {
                 Store.setState(state => {
                     state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
                     state.dataFollow.total = data.data.data.user.edge_followed_by.count;
@@ -87,14 +89,20 @@ const Actions = {
                         && state.dataFollow.listUser.length <= state.filter.limit
                         && state.filter.limit > state.filter.pageSize) {
                         this.getListFollow(data.data.data.user.edge_followed_by.page_info.end_cursor);
+                    } else {
+                        Store.setState(state => {
+                            state.loading_get_list_user = false;
+                            return state;
+                        });
                     }
                 }, 1000)
             }
+
         }).catch(ex => {
-            console.warn('Get list user follow failed ', ex);
+            alert('Get list user follow failed ', ex);
             Store.setState(state => {
-                state.dataFollow.listUser = [];
                 state.dataFollow.total = 0;
+                state.loading_get_list_user = false;
                 return state;
             })
 
@@ -148,8 +156,14 @@ const Actions = {
 
     followAll() {
         let userId = this.randomUserId();
-        if (!userId) return;
-
+        if (!userId) return Store.setState(state => {
+            state.loading_follow_list_user = false;
+            return state;
+        });
+        Store.setState(state => {
+            state.loading_follow_list_user = true;
+            return state;
+        });
         API.followAll(userId, Store.getState().infoAccount.token).then(data => {
             if (data.data.status === 'ok') {
                 Store.setState(state => {
@@ -175,7 +189,17 @@ const Actions = {
                 }, timeOut * 1000)
             }
         }).catch(ex => {
-            console.warn("Follow someone id  failed", ex);
+            alert(`Follow userid ${userId} failed`, ex);
+            let configure = Store.getState().configure;
+            let min = configure.wait_between_actions;
+            if (configure.countFollow % 15 === 0) { // follow 15 times => delay
+                min = configure.wait_minus_after_sort
+            }
+            let max = min + min * (configure.random_wait / 100);
+            let timeOut = Utils.randomIntFromTo(min, max);
+            setTimeout(() => {
+                this.followAll();
+            }, timeOut * 1000)
         })
     },
     setShowFollowed(is) {

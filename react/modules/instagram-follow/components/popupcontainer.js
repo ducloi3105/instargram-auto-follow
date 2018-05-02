@@ -25,6 +25,12 @@ class PopupContainer extends React.Component {
     render() {
         return (
             <div className="popup-container" style={{display: this.state.display}}>
+                <div className="progress"
+                     style={{
+                         width: "0%",
+                         opacity: 0
+                     }}
+                     data-v-634ff062=""/>
                 <div id="BotInjectedContainer">
                     <div className="container-wrapper">
                         <div className="header-wrap">

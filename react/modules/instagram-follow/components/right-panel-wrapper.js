@@ -26,6 +26,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
     }
 
     handleLoadFollowers() {
+        if (this.props.loading_get_list_user) return;
         let userId = this.state.userId;
         if (!userId) {
             this.setState({message: 'Please enter user id '});
@@ -49,6 +50,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
     render() {
         let props = this.props;
+        console.log(props)
         return (
             <div className="right-panel-wrapper">
                 <details className="config-wrapper" open>
@@ -81,8 +83,11 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
                     </div>
                 </details>
-                <div className="multi-actions-button"
-                     onClick={this.handleLoadFollowers}>Load {this.state.userId} followers
+                <div className="multi-actions-button" onClick={this.handleLoadFollowers}>
+                    <span>
+                        {props.loading_get_list_user ? <i className="fa fa-spinner fa-pulse fa-fw"/>:null}
+                        Load {this.state.userId} followers
+                    </span>
                 </div>
                 <details className="config-wrapper">
                     <summary>Filter list follower</summary>
@@ -149,16 +154,24 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
                     </div>
                 </details>
-                <div className="multi-actions-button" onClick={e=>{
+                <div className="multi-actions-button" onClick={e => {
+                    if (this.props.loading_follow_list_user) return;
                     Actions.setShowFollowed(false);
                     Actions.followAll()
-                }}>Follow all</div>
+                }}>
+                    <span>
+                        {props.loading_follow_list_user?<i className="fa fa-spinner fa-pulse fa-fw"/>:null}
+                        Follow all
+                    </span>
+                </div>
             </div>
         )
     }
 }, appState => {
     let configure = appState.configure;
     return {
+        loading_get_list_user: appState.loading_get_list_user,
+        loading_follow_list_user: appState.loading_follow_list_user,
         showFollowers: appState.filter.showFollowers,
         showFollowed: appState.filter.showFollowed,
         limit: appState.filter.limit,
