@@ -14,7 +14,7 @@ let ListFollow = Store.connect(class App extends React.Component {
             return (
                 Helper.uniDecode(item.node.username.toLowerCase()).indexOf(Helper.uniDecode(this.props.filter.keywords.toLowerCase())) !== -1 ||
                 Helper.uniDecode(item.node.full_name.toLowerCase()).indexOf(Helper.uniDecode(this.props.filter.keywords.toLowerCase())) !== -1
-            ) && this.props.filter.showFollowers.min <= index && this.props.filter.showFollowers.max >= index
+            ) && this.props.filter.showFollowers.min <= index && this.props.filter.showFollowers.max > index
         }).filter(item => {
             if (this.props.filter.showFollowed) {
                 return item

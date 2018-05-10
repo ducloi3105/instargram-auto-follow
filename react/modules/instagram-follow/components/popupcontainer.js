@@ -24,8 +24,10 @@ let PopupContainer = Store.connect(class extends React.Component {
     }
 
     render() {
-        let listUser = this.props.dataFollow.listUser;
-        let userFollowers = listUser.filter((item, index) => {
+        let listUser = this.props.dataFollow.listUser.filter((item, index)=>{
+            return this.props.filter.showFollowers.min <= index && this.props.filter.showFollowers.max > index
+        })
+        let userFollowing = listUser.filter((item, index) => {
             return item.node.followed_by_viewer === false && item.node.requested_by_viewer === false && item.node.is_verified === false
         });
 
@@ -37,8 +39,8 @@ let PopupContainer = Store.connect(class extends React.Component {
                             <h1>Automation for Instagram™</h1>
                             <div className="show-total-accounts">
                                 <span>Total: <b>{listUser.length}</b></span>
-                                <span>Followers: <b>{listUser.length - userFollowers.length}</b></span>
-                                <span>Following: <b>{userFollowers.length}</b></span>
+                                <span>Followers: <b>{listUser.length - userFollowing.length}</b></span>
+                                <span>Following: <b>{userFollowing.length}</b></span>
                             </div>
                             <button className="close-popup" onClick={this.closePopup}/>
                         </div>
@@ -57,7 +59,8 @@ let PopupContainer = Store.connect(class extends React.Component {
     }
 }, appState => {
     return {
-        dataFollow: appState.dataFollow
+        dataFollow: appState.dataFollow,
+        filter: appState.filter,
     }
 })
 export default PopupContainer;

@@ -83,14 +83,23 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
                     </div>
                 </details>
-                <div className="multi-actions-button" onClick={this.handleLoadFollowers}>
-                    <span>
-                        {props.loading_get_list_user ? <i className="fa fa-spinner fa-pulse fa-fw"/>:null}
-                        Load {this.state.userId} followers
-                    </span>
+                <div className="load-follow">
+                    <div className="multi-actions-button" onClick={this.handleLoadFollowers}>
+                        <span>
+                            {props.loading_get_list_user ? <i className="fa fa-spinner fa-pulse fa-fw"/>:null}
+                            Load followers
+                        </span>
+                    </div>
+
+                    <div className="multi-actions-button" onClick={this.handleLoadFollowers}>
+                        <span>
+                            {props.loading_get_list_user ? <i className="fa fa-spinner fa-pulse fa-fw"/>:null}
+                            Load following
+                        </span>
+                    </div>
                 </div>
                 <details className="config-wrapper">
-                    <summary>Filter list follower</summary>
+                    <summary>Filter list users</summary>
                     <div className="config-options">
                         <div className="row-info">Filter username or user id:</div>
 
@@ -100,12 +109,12 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                             }}/>
                         </div>
                         <div className="row-info">
-                            Show user followed:
+                            Show user followers:
                             <input type="checkbox" defaultChecked={props.showFollowed} onChange={(e) => {
                                 Actions.changeFilter('showFollowed', e.target.value)
                             }}/>
                         </div>
-                        <div className="row-info">Show follower from-to:</div>
+                        <div className="row-info">Show user from-to:</div>
                         <div className="row-info input-range">
                             <InputRange
                                 step={1}

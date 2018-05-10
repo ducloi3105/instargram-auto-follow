@@ -38,6 +38,10 @@ const Actions = {
         if (!username) return console.warn('Typing username or redirect link to user.');
         let url = window.location.origin;
         url += '/' + username;
+        Store.setState(state => {
+            state.loading_get_list_user = false;
+            return state;
+        })
         API.getUserIdFromUrl(url).then(data => {
             Store.setState(state => {
                 try {
@@ -80,6 +84,8 @@ const Actions = {
                 Store.setState(state => {
                     state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
                     state.dataFollow.total = data.data.data.user.edge_followed_by.count;
+                    state.filter.showFollowers.max = state.dataFollow.listUser.length;
+                    if (state.filter.showFollowers.maxStep > state.filter.showFollowers.max) state.filter.showFollowers.maxStep = state.filter.showFollowers.max;
                     return state;
                 });
 
