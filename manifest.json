@@ -19,17 +19,24 @@
       "js": [
         "./statics/bundles/commons.js",
         "./statics/bundles/instagram-follow.js"
+      ],
+      "images": [
+        "./statics/images/display_image.png"
       ]
     }
   ],
   "web_accessible_resources": [
     "./statics/bundles/commons.js",
-    "./statics/bundles/instagram-follow.js"
+    "./statics/bundles/instagram-follow.js",
+    "display_image.png"
   ],
   "background": {
     "scripts": [
       "./statics/bundles/commons.js",
       "./statics/bundles/instagram-follow.js"
+    ],
+    "images":[
+        "./statics/images/display_image.png"
     ],
     "persistent": true
   },

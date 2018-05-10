@@ -8,7 +8,7 @@ let ListFollow = Store.connect(class App extends React.Component {
             <div className="left-panel-wrapper">
                 <pre>No data!</pre>
             </div>
-        )
+        );
 
         let listUser = this.props.listUser.filter((item, index) => {
             return (

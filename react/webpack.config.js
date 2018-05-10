@@ -7,7 +7,12 @@ let ProgressBarPlugin = require('progress-bar-webpack-plugin');
 let chalk = require('chalk');
 let BLACKLIST = [
     'test',
-    'common'
+    'common',
+    'dashboard',
+    'follow',
+    'login',
+    'utils'
+
 ];
 let moduleName = 'modules';
 

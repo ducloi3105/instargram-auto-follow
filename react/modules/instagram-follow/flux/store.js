@@ -40,7 +40,7 @@ let state = {
     },
     loading_get_list_user: false,
     loading_follow_list_user: false,
-
+    progress: 0
 
 };
 

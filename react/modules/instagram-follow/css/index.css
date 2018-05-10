@@ -53,14 +53,8 @@ body, button, input, textarea {
     z-index: 99999;
 }
 
-
 #show-follow-instagram-popup .popup-container .progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     height: 2px;
-    width: 0;
     transition: width .2s, opacity .4s;
     opacity: 1;
     z-index: 999999;
@@ -92,29 +86,13 @@ body, button, input, textarea {
 }
 
 #follow-instagram-310594 .follow-container {
-    /*width: 40px;*/
-    /*height: 40px;*/
     position: fixed;
     top: 150px;
     left: 10px;
-    /*background-image: url(../../../../statics/images/instagram_white.png);*/
-    background-image: url(/static/bundles/base/sprite_core.png/b32d382b99a8.png);
     background-repeat: no-repeat;
-    background-position: -395px -430px;
-    height: 30px;
-    width: 30px;
+    height: 100%;
+    width: 100%;
     cursor: pointer;
-}
-
-._5rnaq .follow-container {
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    display: inline-block;
-    background-size: contain;
-    margin: -12px 10px 0px 0px;
-    background-image: url(/static/bundles/base/sprite_core.png/b32d382b99a8.png);
-    top: 0;
 }
 
 #show-follow-instagram-popup #BotInjectedContainer {
@@ -183,7 +161,7 @@ body, button, input, textarea {
     max-height: 100%;
 }
 
-#show-follow-instagram-popup .popup-container .left-wrap{
+#show-follow-instagram-popup .popup-container .left-wrap {
     display: flex;
     flex-direction: column;
     width: calc(100% - 400px);
@@ -316,4 +294,22 @@ body, button, input, textarea {
 
 .input-range__label {
     color: #035a33 !important;
+}
+
+.show-total-accounts{
+    display:flex;
+    flex-direction: initial;
+}
+
+.show-total-accounts span {
+    margin-right: 10px;
+}
+
+.show-total-accounts span:last-of-type {
+    margin-right: 0;
+}
+
+
+.show-total-accounts span b {
+    color:green;
 }

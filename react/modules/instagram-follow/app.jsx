@@ -40,8 +40,11 @@ const App = Store.connect(class App extends React.Component {
     }
 
     render() {
+
         return (
-            <div className="follow-container" onClick={this.showPopup} title="Automation for Instagram™"/>
+            <div className="follow-container" onClick={this.showPopup} title="Automation for Instagram™" 
+                 style={{backgroundImage:`url(${chrome.extension.getURL('display_image.png')})`}}
+            />
         )
     }
 }, appState => {

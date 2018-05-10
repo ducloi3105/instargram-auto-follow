@@ -184,7 +184,19 @@ const Actions = {
                 }
                 let max = min + min * (configure.random_wait / 100);
                 let timeOut = Utils.randomIntFromTo(min, max);
+                let timer = timeOut/100;
+                let interval = setInterval(() => {
+                    Store.setState(state => {
+                        state.progress += 1;
+                        return state;
+                    })
+                }, timer * 1000);
                 setTimeout(() => {
+                    Store.setState(state => {
+                        state.progress = 0;
+                        return state;
+                    });
+                    clearInterval(interval);
                     this.followAll();
                 }, timeOut * 1000)
             }

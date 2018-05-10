@@ -4,8 +4,9 @@ import Store from "../flux/store";
 import Action from "../flux/actions";
 import LeftPanelItem from './left-panel-item';
 import RightPanel from './right-panel-wrapper';
+import Progress from './progress-noti'
 
-class PopupContainer extends React.Component {
+let PopupContainer = Store.connect(class extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -23,23 +24,27 @@ class PopupContainer extends React.Component {
     }
 
     render() {
+        let listUser = this.props.dataFollow.listUser;
+        let userFollowers = listUser.filter((item, index) => {
+            return item.node.followed_by_viewer === false && item.node.requested_by_viewer === false && item.node.is_verified === false
+        });
+
         return (
             <div className="popup-container" style={{display: this.state.display}}>
-
                 <div id="BotInjectedContainer">
                     <div className="container-wrapper">
                         <div className="header-wrap">
                             <h1>Automation for Instagram™</h1>
+                            <div className="show-total-accounts">
+                                <span>Total: <b>{listUser.length}</b></span>
+                                <span>Followers: <b>{listUser.length - userFollowers.length}</b></span>
+                                <span>Following: <b>{userFollowers.length}</b></span>
+                            </div>
                             <button className="close-popup" onClick={this.closePopup}/>
                         </div>
                         <div className="content-wrap">
                             <div className="left-wrap">
-                                <div className="progress"
-                                     style={{
-                                         width: "0%",
-                                         opacity: 0
-                                     }}
-                                     data-v-634ff062=""/>
+                                <Progress/>
                                 <LeftPanelItem/>
                             </div>
 
@@ -50,6 +55,9 @@ class PopupContainer extends React.Component {
             </div>
         )
     }
-}
-
-export default PopupContainer
+}, appState => {
+    return {
+        dataFollow: appState.dataFollow
+    }
+})
+export default PopupContainer;
