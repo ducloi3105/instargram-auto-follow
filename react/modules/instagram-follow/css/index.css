@@ -58,7 +58,7 @@ body, button, input, textarea {
     transition: width .2s, opacity .4s;
     opacity: 1;
     z-index: 999999;
-    background-color: rgb(0, 255, 20);
+    background-color: rgb(84, 136, 199);
 }
 
 #show-follow-instagram-popup .popup-container .close-popup {
