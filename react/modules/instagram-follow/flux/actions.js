@@ -71,16 +71,17 @@ const Actions = {
         let state = Store.getState();
         let pageSize = (state.filter.pageSize > state.filter.limit) ? state.filter.limit : state.filter.pageSize;
         let payload = {
-            query_hash: state.query_hash,
+            query_hash: state.query_hash_which,
             userId: state.infoWho.id,
             first: pageSize,
         };
         if (after) payload.after = after;
         API.getListFollow(payload).then(data => {
             if (data.status === 200) {
+                let egde_followed = state.query_hash_which === state.query_hash?data.data.data.user.edge_followed_by:data.data.data.user.edge_follow;
                 Store.setState(state => {
-                    state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
-                    state.dataFollow.total = data.data.data.user.edge_followed_by.count;
+                    state.dataFollow.listUser = state.dataFollow.listUser.concat(egde_followed.edges);
+                    state.dataFollow.total = egde_followed.count;
                     state.filter.showFollowers.max = state.dataFollow.listUser.length-1;
                     state.filter.showFollowers.maxStep = state.dataFollow.listUser.length;
 
@@ -88,10 +89,10 @@ const Actions = {
                 });
                 timeoutGetFollowers = setTimeout(() => {
                     let state = Store.getState();
-                    if (data.data.data.user.edge_followed_by.page_info.has_next_page
+                    if (egde_followed.page_info.has_next_page
                         && state.dataFollow.listUser.length <= state.filter.limit
                         && state.filter.limit > state.filter.pageSize) {
-                        this.getListFollow(data.data.data.user.edge_followed_by.page_info.end_cursor);
+                        this.getListFollow(egde_followed.page_info.end_cursor);
                     } else {
                         Store.setState(state => {
                             state.loading_get_list_user_followers = false;
@@ -242,6 +243,12 @@ const Actions = {
             return state;
         });
         clearTimeout(timeoutGetFollowers);
+    },
+    whichFollow(is) {
+        Store.setState(state => {
+            state.query_hash_which = is;
+            return state;
+        });
     }
 };
 

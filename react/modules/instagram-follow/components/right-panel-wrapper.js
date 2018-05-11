@@ -13,7 +13,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
             userId: '',
             message: '',
         };
-        this.changeUserId = this.changeUserId.bind(this)
+        this.changeUserId = this.changeUserId.bind(this);
         this.handleLoadFollowers = this.handleLoadFollowers.bind(this)
     }
 
@@ -27,7 +27,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
         this.setState(state)
     }
 
-    handleLoadFollowers() {
+    handleLoadFollowers(which) {
         if (this.props.loading_get_list_user_followers) return;
         let userId = this.state.userId;
         if (!userId) {
@@ -37,7 +37,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
             return this.validUserId.focus();
         }
         Actions.setShowFollowed(true);
-
+        Actions.whichFollow(which);
         Actions.pressUserId(userId);
 
     }
@@ -74,7 +74,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                                    onChange={this.changeUserId}
                                    onKeyUp={e => {
                                        if (e.keyCode === 13) {
-                                           this.handleLoadFollowers()
+                                           this.handleLoadFollowers(props.query_hash)
                                        }
                                    }}
                             />
@@ -91,14 +91,20 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                     </div>
                 </details>
                 <div className="load-follow">
-                    <ButtonLoadFollowers loading={props.loading_get_list_user_followers} handleLoadFollowers={this.handleLoadFollowers}/>
-
-                    <div className="multi-actions-button" onClick={this.handleLoadFollowers}>
-                        <span>
-                            {props.loading_get_list_user_followers ? <i className="fa fa-spinner fa-pulse fa-fw"/> : null}
-                            Load following
-                        </span>
-                    </div>
+                    <ButtonLoadFollowers
+                        loading={props.loading_get_list_user_followers && props.query_hash_which === props.query_hash}
+                        handleLoadFollowers={this.handleLoadFollowers}
+                        query_hash={props.query_hash}
+                        textStop="Stop load followers"
+                        textStart="Load followers"
+                    />
+                    <ButtonLoadFollowers
+                        loading={props.loading_get_list_user_followers && props.query_hash_which === props.query_hash_following}
+                        handleLoadFollowers={this.handleLoadFollowers}
+                        query_hash={props.query_hash_following}
+                        textStop="Stop load following"
+                        textStart="Load following"
+                    />
                 </div>
                 <details className="config-wrapper" open>
                     <summary>Filter list users</summary>
@@ -178,6 +184,9 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 }, appState => {
     let configure = appState.configure;
     return {
+        query_hash: appState.query_hash,
+        query_hash_following: appState.query_hash_following,
+        query_hash_which: appState.query_hash_which,
         loading_get_list_user_followers: appState.loading_get_list_user_followers,
         loading_follow_list_user: appState.loading_follow_list_user,
         showFollowers: appState.filter.showFollowers,

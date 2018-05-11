@@ -634,7 +634,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var state = {
     query_hash: '37479f2b8209594dde7facb0d904896a', // followers
-    query_hash_following: '37479f2b8209594dde7facb0d904896a', // following
+    query_hash_following: '58712303d941c6855d4e888c5f0cd22f', // following
+    query_hash_which: '',
     infoAccount: {
         token: '',
         id: '',
@@ -878,16 +879,17 @@ var Actions = {
         var state = _store2.default.getState();
         var pageSize = state.filter.pageSize > state.filter.limit ? state.filter.limit : state.filter.pageSize;
         var payload = {
-            query_hash: state.query_hash,
+            query_hash: state.query_hash_which,
             userId: state.infoWho.id,
             first: pageSize
         };
         if (after) payload.after = after;
         _API2.default.getListFollow(payload).then(function (data) {
             if (data.status === 200) {
+                var egde_followed = state.query_hash_which === state.query_hash ? data.data.data.user.edge_followed_by : data.data.data.user.edge_follow;
                 _store2.default.setState(function (state) {
-                    state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
-                    state.dataFollow.total = data.data.data.user.edge_followed_by.count;
+                    state.dataFollow.listUser = state.dataFollow.listUser.concat(egde_followed.edges);
+                    state.dataFollow.total = egde_followed.count;
                     state.filter.showFollowers.max = state.dataFollow.listUser.length - 1;
                     state.filter.showFollowers.maxStep = state.dataFollow.listUser.length;
 
@@ -895,8 +897,8 @@ var Actions = {
                 });
                 timeoutGetFollowers = setTimeout(function () {
                     var state = _store2.default.getState();
-                    if (data.data.data.user.edge_followed_by.page_info.has_next_page && state.dataFollow.listUser.length <= state.filter.limit && state.filter.limit > state.filter.pageSize) {
-                        _this2.getListFollow(data.data.data.user.edge_followed_by.page_info.end_cursor);
+                    if (egde_followed.page_info.has_next_page && state.dataFollow.listUser.length <= state.filter.limit && state.filter.limit > state.filter.pageSize) {
+                        _this2.getListFollow(egde_followed.page_info.end_cursor);
                     } else {
                         _store2.default.setState(function (state) {
                             state.loading_get_list_user_followers = false;
@@ -1045,6 +1047,12 @@ var Actions = {
             return state;
         });
         clearTimeout(timeoutGetFollowers);
+    },
+    whichFollow: function whichFollow(is) {
+        _store2.default.setState(function (state) {
+            state.query_hash_which = is;
+            return state;
+        });
     }
 };
 
@@ -23009,7 +23017,7 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
         }
     }, {
         key: 'handleLoadFollowers',
-        value: function handleLoadFollowers() {
+        value: function handleLoadFollowers(which) {
             if (this.props.loading_get_list_user_followers) return;
             var userId = this.state.userId;
             if (!userId) {
@@ -23019,7 +23027,7 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                 return this.validUserId.focus();
             }
             _actions2.default.setShowFollowed(true);
-
+            _actions2.default.whichFollow(which);
             _actions2.default.pressUserId(userId);
         }
     }, {
@@ -23079,7 +23087,7 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                                 onChange: this.changeUserId,
                                 onKeyUp: function onKeyUp(e) {
                                     if (e.keyCode === 13) {
-                                        _this2.handleLoadFollowers();
+                                        _this2.handleLoadFollowers(props.query_hash);
                                     }
                                 }
                             })
@@ -23100,17 +23108,20 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                 _react2.default.createElement(
                     'div',
                     { className: 'load-follow' },
-                    _react2.default.createElement(_buttonLoadFollowers2.default, { loading: props.loading_get_list_user_followers, handleLoadFollowers: this.handleLoadFollowers }),
-                    _react2.default.createElement(
-                        'div',
-                        { className: 'multi-actions-button', onClick: this.handleLoadFollowers },
-                        _react2.default.createElement(
-                            'span',
-                            null,
-                            props.loading_get_list_user_followers ? _react2.default.createElement('i', { className: 'fa fa-spinner fa-pulse fa-fw' }) : null,
-                            'Load following'
-                        )
-                    )
+                    _react2.default.createElement(_buttonLoadFollowers2.default, {
+                        loading: props.loading_get_list_user_followers && props.query_hash_which === props.query_hash,
+                        handleLoadFollowers: this.handleLoadFollowers,
+                        query_hash: props.query_hash,
+                        textStop: 'Stop load followers',
+                        textStart: 'Load followers'
+                    }),
+                    _react2.default.createElement(_buttonLoadFollowers2.default, {
+                        loading: props.loading_get_list_user_followers && props.query_hash_which === props.query_hash_following,
+                        handleLoadFollowers: this.handleLoadFollowers,
+                        query_hash: props.query_hash_following,
+                        textStop: 'Stop load following',
+                        textStart: 'Load following'
+                    })
                 ),
                 _react2.default.createElement(
                     'details',
@@ -23222,6 +23233,9 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
 }(_react2.default.Component), function (appState) {
     var configure = appState.configure;
     return {
+        query_hash: appState.query_hash,
+        query_hash_following: appState.query_hash_following,
+        query_hash_which: appState.query_hash_which,
         loading_get_list_user_followers: appState.loading_get_list_user_followers,
         loading_follow_list_user: appState.loading_follow_list_user,
         showFollowers: appState.filter.showFollowers,
@@ -26165,6 +26179,8 @@ var ButtonFollow = function (_React$Component) {
     _createClass(ButtonFollow, [{
         key: "render",
         value: function render() {
+            var _this2 = this;
+
             var loading = this.props.loading;
             if (loading) return _react2.default.createElement(
                 "div",
@@ -26177,17 +26193,19 @@ var ButtonFollow = function (_React$Component) {
                     "span",
                     null,
                     _react2.default.createElement("i", { className: "fa fa-spinner fa-pulse fa-fw" }),
-                    "Stop load followers"
+                    this.props.textStop
                 )
             );
 
             return _react2.default.createElement(
                 "div",
-                { className: "multi-actions-button", onClick: this.props.handleLoadFollowers },
+                { className: "multi-actions-button", onClick: function onClick() {
+                        _this2.props.handleLoadFollowers(_this2.props.query_hash);
+                    } },
                 _react2.default.createElement(
                     "span",
                     null,
-                    "Load followers"
+                    this.props.textStart
                 )
             );
         }

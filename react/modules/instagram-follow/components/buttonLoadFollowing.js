@@ -19,7 +19,9 @@ class ButtonFollow extends React.Component {
         );
 
         return (
-            <div className="multi-actions-button" onClick={this.props.handleLoadFollowers}>
+            <div className="multi-actions-button" onClick={() => {
+                this.props.handleLoadFollowers(this.props.query_hash)
+            }}>
                 <span>
                     Load following
                 </span>

@@ -13,18 +13,19 @@ class ButtonFollow extends React.Component {
             >
             <span>
                 <i className="fa fa-spinner fa-pulse fa-fw"/>
-                Stop load followers
+                {this.props.textStop}
             </span>
             </div>
         );
 
         return (
-            <div className="multi-actions-button" onClick={this.props.handleLoadFollowers}>
-                <span>
-                    Load followers
-                </span>
+            <div className="multi-actions-button" onClick={() => {
+                this.props.handleLoadFollowers(this.props.query_hash)
+            }}>
+                <span>{this.props.textStart}</span>
             </div>
         )
     }
 }
+
 export default ButtonFollow;

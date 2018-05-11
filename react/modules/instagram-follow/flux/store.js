@@ -2,7 +2,8 @@ import createStore from '../../common/create-store';
 
 let state = {
     query_hash: '37479f2b8209594dde7facb0d904896a',// followers
-    query_hash_following: '37479f2b8209594dde7facb0d904896a',// following
+    query_hash_following: '58712303d941c6855d4e888c5f0cd22f',// following
+    query_hash_which: '',
     infoAccount: {
         token: '',
         id: '',
