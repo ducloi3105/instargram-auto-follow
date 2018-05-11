@@ -3,6 +3,8 @@ import Store from '../flux/store';
 import Actions from '../flux/actions';
 import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
+import ButtonFollow from './buttonFollowAll';
+import ButtonLoadFollowers from './buttonLoadFollowers';
 
 let RightPanel = Store.connect(class RightPanel extends React.Component {
     constructor() {
@@ -10,7 +12,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
         this.state = {
             userId: '',
             message: '',
-        }
+        };
         this.changeUserId = this.changeUserId.bind(this)
         this.handleLoadFollowers = this.handleLoadFollowers.bind(this)
     }
@@ -26,7 +28,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
     }
 
     handleLoadFollowers() {
-        if (this.props.loading_get_list_user) return;
+        if (this.props.loading_get_list_user_followers) return;
         let userId = this.state.userId;
         if (!userId) {
             this.setState({message: 'Please enter user id '});
@@ -48,9 +50,14 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
         )
     }
 
+    componentDidUpdate() {
+        if(this.checkboxFollowed){
+            this.checkboxFollowed.checked = this.props.showFollowed;
+        }
+    }
+
     render() {
         let props = this.props;
-        console.log(props)
         return (
             <div className="right-panel-wrapper">
                 <details className="config-wrapper" open>
@@ -84,21 +91,16 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                     </div>
                 </details>
                 <div className="load-follow">
-                    <div className="multi-actions-button" onClick={this.handleLoadFollowers}>
-                        <span>
-                            {props.loading_get_list_user ? <i className="fa fa-spinner fa-pulse fa-fw"/>:null}
-                            Load followers
-                        </span>
-                    </div>
+                    <ButtonLoadFollowers loading={props.loading_get_list_user_followers} handleLoadFollowers={this.handleLoadFollowers}/>
 
                     <div className="multi-actions-button" onClick={this.handleLoadFollowers}>
                         <span>
-                            {props.loading_get_list_user ? <i className="fa fa-spinner fa-pulse fa-fw"/>:null}
+                            {props.loading_get_list_user_followers ? <i className="fa fa-spinner fa-pulse fa-fw"/> : null}
                             Load following
                         </span>
                     </div>
                 </div>
-                <details className="config-wrapper">
+                <details className="config-wrapper" open>
                     <summary>Filter list users</summary>
                     <div className="config-options">
                         <div className="row-info">Filter username or user id:</div>
@@ -109,10 +111,16 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                             }}/>
                         </div>
                         <div className="row-info">
-                            Show user followers:
-                            <input type="checkbox" defaultChecked={props.showFollowed} onChange={(e) => {
-                                Actions.changeFilter('showFollowed', e.target.value)
-                            }}/>
+                            Show user followed:
+                            <input type="checkbox" defaultChecked={props.showFollowed}
+                                   ref={(el) => {
+                                       this.checkboxFollowed = el;
+                                   }}
+                                   onChange={(e) => {
+                                       Actions.changeFilter('showFollowed', e.target.value)
+                                   }}
+                            />
+
                         </div>
                         <div className="row-info">Show user from-to:</div>
                         <div className="row-info input-range">
@@ -141,9 +149,9 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                         </div>
 
                         <div className="row-info">
-                            <input type="checkbox" defaultChecked={props.is_random} onChange={(e) => {
-                                Actions.changeConfigure('is_random', e.target.value)
-                            }}/>
+                            {/*<input type="checkbox" defaultChecked={props.is_random} onChange={(e) => {*/}
+                            {/*Actions.changeConfigure('is_random', e.target.value)*/}
+                            {/*}}/>*/}
                             Randomize wait time by up to:
                             <input type="number" value={props.random_wait}
                                    onChange={(e) => {
@@ -163,23 +171,14 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
                     </div>
                 </details>
-                <div className="multi-actions-button" onClick={e => {
-                    if (this.props.loading_follow_list_user) return;
-                    Actions.setShowFollowed(false);
-                    Actions.followAll()
-                }}>
-                    <span>
-                        {props.loading_follow_list_user?<i className="fa fa-spinner fa-pulse fa-fw"/>:null}
-                        Follow all
-                    </span>
-                </div>
+                <ButtonFollow loading={this.props.loading_follow_list_user}/>
             </div>
         )
     }
 }, appState => {
     let configure = appState.configure;
     return {
-        loading_get_list_user: appState.loading_get_list_user,
+        loading_get_list_user_followers: appState.loading_get_list_user_followers,
         loading_follow_list_user: appState.loading_follow_list_user,
         showFollowers: appState.filter.showFollowers,
         showFollowed: appState.filter.showFollowed,

@@ -39,7 +39,8 @@ let state = {
         listUser: [],
         total: 0
     },
-    loading_get_list_user: false,
+    loading_get_list_user_followers: false,
+    loading_get_list_user_following: false,
     loading_follow_list_user: false,
     progress: 0
 

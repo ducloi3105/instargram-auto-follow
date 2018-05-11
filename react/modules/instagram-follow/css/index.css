@@ -240,6 +240,10 @@ body, button, input, textarea {
     padding: 8px 0;
 }
 
+.multi-actions-button.stop{
+    background: red;
+}
+
 #BotInjectedContainer .content-wrap .right-panel-wrapper {
     width: 380px;
     min-width: 380px;

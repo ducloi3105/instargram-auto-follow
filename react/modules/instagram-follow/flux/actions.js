@@ -3,6 +3,7 @@ import {OAuth} from "oauthio-web";
 import API from '../API'
 import Utils from '../../common/utils'
 
+let timeoutFollowAll, intervalProgress, timeoutGetFollowers, timeoutGetFllowing;
 const Actions = {
     getInfoAccount() {
         let url = window.location.origin;
@@ -29,7 +30,7 @@ const Actions = {
         Store.setState(state => {
             state.dataFollow.listUser = [];
             state.dataFollow.total = 0;
-            state.loading_get_list_user = true;
+            state.loading_get_list_user_followers = true;
             return state;
         });
         this.getSomeone(userId)
@@ -38,10 +39,6 @@ const Actions = {
         if (!username) return console.warn('Typing username or redirect link to user.');
         let url = window.location.origin;
         url += '/' + username;
-        Store.setState(state => {
-            state.loading_get_list_user = false;
-            return state;
-        })
         API.getUserIdFromUrl(url).then(data => {
             Store.setState(state => {
                 try {
@@ -65,7 +62,7 @@ const Actions = {
             Store.setState(state => {
                 state.infoWho.username = '';
                 state.infoWho.id = '';
-                state.loading_get_list_user = false;
+                state.loading_get_list_user_followers = false;
                 return state;
             })
         })
@@ -84,12 +81,12 @@ const Actions = {
                 Store.setState(state => {
                     state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
                     state.dataFollow.total = data.data.data.user.edge_followed_by.count;
-                    state.filter.showFollowers.max = state.dataFollow.listUser.length;
-                    if (state.filter.showFollowers.maxStep > state.filter.showFollowers.max) state.filter.showFollowers.maxStep = state.filter.showFollowers.max;
+                    state.filter.showFollowers.max = state.dataFollow.listUser.length-1;
+                    state.filter.showFollowers.maxStep = state.dataFollow.listUser.length;
+
                     return state;
                 });
-
-                setTimeout(() => {
+                timeoutGetFollowers = setTimeout(() => {
                     let state = Store.getState();
                     if (data.data.data.user.edge_followed_by.page_info.has_next_page
                         && state.dataFollow.listUser.length <= state.filter.limit
@@ -97,7 +94,7 @@ const Actions = {
                         this.getListFollow(data.data.data.user.edge_followed_by.page_info.end_cursor);
                     } else {
                         Store.setState(state => {
-                            state.loading_get_list_user = false;
+                            state.loading_get_list_user_followers = false;
                             return state;
                         });
                     }
@@ -105,10 +102,11 @@ const Actions = {
             }
 
         }).catch(ex => {
+            clearTimeout(timeoutGetFollowers);
             alert('Get list user follow failed ', ex);
             Store.setState(state => {
                 state.dataFollow.total = 0;
-                state.loading_get_list_user = false;
+                state.loading_get_list_user_followers = false;
                 return state;
             })
 
@@ -182,49 +180,68 @@ const Actions = {
                     state.configure.countFollow += 1;
                     return state;
                 });
+                this.continueFollowAll()
 
-                let configure = Store.getState().configure;
-                let min = configure.wait_between_actions;
-                if (configure.countFollow % 15 === 0) { // follow 15 times => delay
-                    min = configure.wait_minus_after_sort
-                }
-                let max = min + min * (configure.random_wait / 100);
-                let timeOut = Utils.randomIntFromTo(min, max);
-                let timer = timeOut/100;
-                let interval = setInterval(() => {
-                    Store.setState(state => {
-                        state.progress += 1;
-                        return state;
-                    })
-                }, timer * 1000);
-                setTimeout(() => {
-                    Store.setState(state => {
-                        state.progress = 0;
-                        return state;
-                    });
-                    clearInterval(interval);
-                    this.followAll();
-                }, timeOut * 1000)
             }
         }).catch(ex => {
             alert(`Follow userid ${userId} failed`, ex);
-            let configure = Store.getState().configure;
-            let min = configure.wait_between_actions;
-            if (configure.countFollow % 15 === 0) { // follow 15 times => delay
-                min = configure.wait_minus_after_sort
-            }
-            let max = min + min * (configure.random_wait / 100);
-            let timeOut = Utils.randomIntFromTo(min, max);
-            setTimeout(() => {
-                this.followAll();
-            }, timeOut * 1000)
+            clearTimeout(timeoutFollowAll);
+            clearInterval(intervalProgress);
+            this.continueFollowAll()
         })
+    },
+    continueFollowAll() {
+        let configure = Store.getState().configure;
+        let min = configure.wait_between_actions;
+        if (configure.countFollow % 15 === 0) { // follow 15 times => delay
+            min = configure.wait_minus_after_sort
+        }
+        let max = min + min * (configure.random_wait / 100);
+        let timeOut = Utils.randomIntFromTo(min, max);
+
+        let timer = timeOut / 100;
+
+        intervalProgress = setInterval(() => {
+            Store.setState(state => {
+                state.progress += 1;
+                return state;
+            })
+        }, timer * 1000);
+
+        timeoutFollowAll = setTimeout(() => {
+            this.followAll();
+        }, timeOut * 1000)
     },
     setShowFollowed(is) {
         Store.setState(state => {
             state.filter.showFollowed = is;
             return state;
         })
+    },
+
+    stopFollowAll() {
+        Store.setState(state => {
+            state.loading_follow_list_user = false;
+            state.progress = 0;
+            return state;
+        });
+        clearTimeout(timeoutFollowAll);
+        clearInterval(intervalProgress);
+    },
+
+    stopLoadFollowers(){
+        Store.setState(state => {
+            state.loading_get_list_user_followers = false;
+            return state;
+        });
+        clearTimeout(timeoutGetFollowers);
+    },
+    stopLoadFollowing(){
+        Store.setState(state => {
+            state.loading_get_list_user_followers = false;
+            return state;
+        });
+        clearTimeout(timeoutGetFollowers);
     }
 };
 

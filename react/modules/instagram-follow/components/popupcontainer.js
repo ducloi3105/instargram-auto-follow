@@ -24,9 +24,11 @@ let PopupContainer = Store.connect(class extends React.Component {
     }
 
     render() {
-        let listUser = this.props.dataFollow.listUser.filter((item, index)=>{
+        let listUser = this.props.dataFollow.listUser.filter((item, index) => {
             return this.props.filter.showFollowers.min <= index && this.props.filter.showFollowers.max > index
-        })
+        }).filter(item => {
+            return item.node.id !== this.props.infoAccount.id;
+        });
         let userFollowing = listUser.filter((item, index) => {
             return item.node.followed_by_viewer === false && item.node.requested_by_viewer === false && item.node.is_verified === false
         });
@@ -59,6 +61,7 @@ let PopupContainer = Store.connect(class extends React.Component {
     }
 }, appState => {
     return {
+        infoAccount: appState.infoAccount,
         dataFollow: appState.dataFollow,
         filter: appState.filter,
     }

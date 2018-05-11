@@ -671,7 +671,8 @@ var state = {
         listUser: [],
         total: 0
     },
-    loading_get_list_user: false,
+    loading_get_list_user_followers: false,
+    loading_get_list_user_following: false,
     loading_follow_list_user: false,
     progress: 0
 
@@ -781,6 +782,279 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _store = __webpack_require__(5);
+
+var _store2 = _interopRequireDefault(_store);
+
+var _oauthioWeb = __webpack_require__(44);
+
+var _API = __webpack_require__(45);
+
+var _API2 = _interopRequireDefault(_API);
+
+var _utils = __webpack_require__(26);
+
+var _utils2 = _interopRequireDefault(_utils);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var timeoutFollowAll = void 0,
+    intervalProgress = void 0,
+    timeoutGetFollowers = void 0,
+    timeoutGetFllowing = void 0;
+var Actions = {
+    getInfoAccount: function getInfoAccount() {
+        var url = window.location.origin;
+        _API2.default.getUserIdFromUrl(url).then(function (data) {
+            _store2.default.setState(function (state) {
+                try {
+                    data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
+
+                    state.infoAccount.token = data.config.csrf_token;
+                    state.infoAccount.id = data.config.viewer.id;
+                } catch (e) {
+                    state.infoAccount.message = "Get info account (token, id)  failed";
+                    console.warn("Get info account (token, id)  failed");
+                }
+
+                return state;
+            });
+        }).catch(function (ex) {
+            console.warn("Get info account (token, id)  failed", ex);
+        });
+    },
+    pressUserId: function pressUserId(userId) {
+        _store2.default.setState(function (state) {
+            state.dataFollow.listUser = [];
+            state.dataFollow.total = 0;
+            state.loading_get_list_user_followers = true;
+            return state;
+        });
+        this.getSomeone(userId);
+    },
+    getSomeone: function getSomeone(username) {
+        var _this = this;
+
+        if (!username) return console.warn('Typing username or redirect link to user.');
+        var url = window.location.origin;
+        url += '/' + username;
+        _API2.default.getUserIdFromUrl(url).then(function (data) {
+            _store2.default.setState(function (state) {
+                try {
+                    data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
+                    var ProfilePage = data.entry_data.ProfilePage;
+                    if (ProfilePage.length > 0) {
+                        var info = ProfilePage[0].graphql.user;
+                        state.infoWho.username = info.username;
+                        state.infoWho.id = info.id;
+                    }
+                } catch (e) {
+                    state.infoWho.message = "Get info account failed";
+                    alert("Get info account failed");
+                }
+
+                return state;
+            });
+            _this.getListFollow();
+        }).catch(function (ex) {
+            alert("UserId incorrect");
+            _store2.default.setState(function (state) {
+                state.infoWho.username = '';
+                state.infoWho.id = '';
+                state.loading_get_list_user_followers = false;
+                return state;
+            });
+        });
+    },
+    getListFollow: function getListFollow(after) {
+        var _this2 = this;
+
+        var state = _store2.default.getState();
+        var pageSize = state.filter.pageSize > state.filter.limit ? state.filter.limit : state.filter.pageSize;
+        var payload = {
+            query_hash: state.query_hash,
+            userId: state.infoWho.id,
+            first: pageSize
+        };
+        if (after) payload.after = after;
+        _API2.default.getListFollow(payload).then(function (data) {
+            if (data.status === 200) {
+                _store2.default.setState(function (state) {
+                    state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
+                    state.dataFollow.total = data.data.data.user.edge_followed_by.count;
+                    state.filter.showFollowers.max = state.dataFollow.listUser.length - 1;
+                    state.filter.showFollowers.maxStep = state.dataFollow.listUser.length;
+
+                    return state;
+                });
+                timeoutGetFollowers = setTimeout(function () {
+                    var state = _store2.default.getState();
+                    if (data.data.data.user.edge_followed_by.page_info.has_next_page && state.dataFollow.listUser.length <= state.filter.limit && state.filter.limit > state.filter.pageSize) {
+                        _this2.getListFollow(data.data.data.user.edge_followed_by.page_info.end_cursor);
+                    } else {
+                        _store2.default.setState(function (state) {
+                            state.loading_get_list_user_followers = false;
+                            return state;
+                        });
+                    }
+                }, 1000);
+            }
+        }).catch(function (ex) {
+            clearTimeout(timeoutGetFollowers);
+            alert('Get list user follow failed ', ex);
+            _store2.default.setState(function (state) {
+                state.dataFollow.total = 0;
+                state.loading_get_list_user_followers = false;
+                return state;
+            });
+        });
+    },
+    changeFilter: function changeFilter(which, value) {
+        _store2.default.setState(function (state) {
+            if (which === 'keywords') {
+                state.filter[which] = value;
+            } else if (which === 'showFollowers') {
+                state.filter[which] = Object.assign({}, state.filter[which], value);
+            } else if (which === 'limit') {
+                value = parseInt(value);
+                if (isNaN(value) || value <= 0) value = 0;
+                state.filter[which] = value;
+            } else if (which === 'showFollowed') {
+                state.filter[which] = !state.filter[which];
+            }
+            return state;
+        });
+    },
+    changeConfigure: function changeConfigure(which, value) {
+        _store2.default.setState(function (state) {
+            if (which === 'is_random') {
+                state.configure[which] = !state.configure[which];
+            } else {
+                value = parseInt(value);
+                if (isNaN(value) || value <= 0) value = 0;
+                state.configure[which] = value;
+            }
+            return state;
+        });
+    },
+    randomUserId: function randomUserId() {
+        var state = _store2.default.getState();
+        var _listUser = state.dataFollow.listUser.filter(function (item, index) {
+            return item.node.followed_by_viewer === false && item.node.requested_by_viewer === false && item.node.is_verified === false;
+        }).filter(function (item, index) {
+            return state.filter.showFollowers.min <= index <= state.filter.showFollowers.max;
+        }).filter(function (item) {
+            return item.node.id !== state.infoAccount.id;
+        });
+        if (_listUser.length === 0) return null;
+        if (_listUser.length === 1) return _listUser[0].node.id;
+        var index = _utils2.default.randomIntFromTo(0, _listUser.length - 1);
+        console.log('===', index, _listUser);
+
+        if (index <= _listUser.length) return _listUser[index].node.id;else this.randomUserId();
+    },
+    followAll: function followAll() {
+        var _this3 = this;
+
+        var userId = this.randomUserId();
+        if (!userId) return _store2.default.setState(function (state) {
+            state.loading_follow_list_user = false;
+            return state;
+        });
+        _store2.default.setState(function (state) {
+            state.loading_follow_list_user = true;
+            return state;
+        });
+        _API2.default.followAll(userId, _store2.default.getState().infoAccount.token).then(function (data) {
+            if (data.data.status === 'ok') {
+                _store2.default.setState(function (state) {
+                    state.dataFollow.listUser.map(function (item, index) {
+                        if (item.node.id === userId) {
+                            item.node.followed_by_viewer = true;
+                        }
+                        return item;
+                    });
+                    state.configure.countFollow += 1;
+                    return state;
+                });
+                _this3.continueFollowAll();
+            }
+        }).catch(function (ex) {
+            alert('Follow userid ' + userId + ' failed', ex);
+            clearTimeout(timeoutFollowAll);
+            clearInterval(intervalProgress);
+            _this3.continueFollowAll();
+        });
+    },
+    continueFollowAll: function continueFollowAll() {
+        var _this4 = this;
+
+        var configure = _store2.default.getState().configure;
+        var min = configure.wait_between_actions;
+        if (configure.countFollow % 15 === 0) {
+            // follow 15 times => delay
+            min = configure.wait_minus_after_sort;
+        }
+        var max = min + min * (configure.random_wait / 100);
+        var timeOut = _utils2.default.randomIntFromTo(min, max);
+
+        var timer = timeOut / 100;
+
+        intervalProgress = setInterval(function () {
+            _store2.default.setState(function (state) {
+                state.progress += 1;
+                return state;
+            });
+        }, timer * 1000);
+
+        timeoutFollowAll = setTimeout(function () {
+            _this4.followAll();
+        }, timeOut * 1000);
+    },
+    setShowFollowed: function setShowFollowed(is) {
+        _store2.default.setState(function (state) {
+            state.filter.showFollowed = is;
+            return state;
+        });
+    },
+    stopFollowAll: function stopFollowAll() {
+        _store2.default.setState(function (state) {
+            state.loading_follow_list_user = false;
+            state.progress = 0;
+            return state;
+        });
+        clearTimeout(timeoutFollowAll);
+        clearInterval(intervalProgress);
+    },
+    stopLoadFollowers: function stopLoadFollowers() {
+        _store2.default.setState(function (state) {
+            state.loading_get_list_user_followers = false;
+            return state;
+        });
+        clearTimeout(timeoutGetFollowers);
+    },
+    stopLoadFollowing: function stopLoadFollowing() {
+        _store2.default.setState(function (state) {
+            state.loading_get_list_user_followers = false;
+            return state;
+        });
+        clearTimeout(timeoutGetFollowers);
+    }
+};
+
+exports.default = Actions;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -801,7 +1075,7 @@ module.exports = emptyObject;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -870,7 +1144,7 @@ module.exports = warning;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -905,7 +1179,7 @@ if (process.env.NODE_ENV !== 'production') {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -982,7 +1256,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //# sourceMappingURL=index.js.map
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -997,8 +1271,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 if (process.env.NODE_ENV !== 'production') {
   var invariant = __webpack_require__(3);
-  var warning = __webpack_require__(8);
-  var ReactPropTypesSecret = __webpack_require__(12);
+  var warning = __webpack_require__(9);
+  var ReactPropTypesSecret = __webpack_require__(13);
   var loggedTypeFailures = {};
 }
 
@@ -1049,7 +1323,7 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1066,261 +1340,6 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
 
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _store = __webpack_require__(5);
-
-var _store2 = _interopRequireDefault(_store);
-
-var _oauthioWeb = __webpack_require__(44);
-
-var _API = __webpack_require__(45);
-
-var _API2 = _interopRequireDefault(_API);
-
-var _utils = __webpack_require__(26);
-
-var _utils2 = _interopRequireDefault(_utils);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Actions = {
-    getInfoAccount: function getInfoAccount() {
-        var url = window.location.origin;
-        _API2.default.getUserIdFromUrl(url).then(function (data) {
-            _store2.default.setState(function (state) {
-                try {
-                    data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
-
-                    state.infoAccount.token = data.config.csrf_token;
-                    state.infoAccount.id = data.config.viewer.id;
-                } catch (e) {
-                    state.infoAccount.message = "Get info account (token, id)  failed";
-                    console.warn("Get info account (token, id)  failed");
-                }
-
-                return state;
-            });
-        }).catch(function (ex) {
-            console.warn("Get info account (token, id)  failed", ex);
-        });
-    },
-    pressUserId: function pressUserId(userId) {
-        _store2.default.setState(function (state) {
-            state.dataFollow.listUser = [];
-            state.dataFollow.total = 0;
-            state.loading_get_list_user = true;
-            return state;
-        });
-        this.getSomeone(userId);
-    },
-    getSomeone: function getSomeone(username) {
-        var _this = this;
-
-        if (!username) return console.warn('Typing username or redirect link to user.');
-        var url = window.location.origin;
-        url += '/' + username;
-        _store2.default.setState(function (state) {
-            state.loading_get_list_user = false;
-            return state;
-        });
-        _API2.default.getUserIdFromUrl(url).then(function (data) {
-            _store2.default.setState(function (state) {
-                try {
-                    data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
-                    var ProfilePage = data.entry_data.ProfilePage;
-                    if (ProfilePage.length > 0) {
-                        var info = ProfilePage[0].graphql.user;
-                        state.infoWho.username = info.username;
-                        state.infoWho.id = info.id;
-                    }
-                } catch (e) {
-                    state.infoWho.message = "Get info account failed";
-                    alert("Get info account failed");
-                }
-
-                return state;
-            });
-            _this.getListFollow();
-        }).catch(function (ex) {
-            alert("UserId incorrect");
-            _store2.default.setState(function (state) {
-                state.infoWho.username = '';
-                state.infoWho.id = '';
-                state.loading_get_list_user = false;
-                return state;
-            });
-        });
-    },
-    getListFollow: function getListFollow(after) {
-        var _this2 = this;
-
-        var state = _store2.default.getState();
-        var pageSize = state.filter.pageSize > state.filter.limit ? state.filter.limit : state.filter.pageSize;
-        var payload = {
-            query_hash: state.query_hash,
-            userId: state.infoWho.id,
-            first: pageSize
-        };
-        if (after) payload.after = after;
-        _API2.default.getListFollow(payload).then(function (data) {
-            if (data.status === 200) {
-                _store2.default.setState(function (state) {
-                    state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
-                    state.dataFollow.total = data.data.data.user.edge_followed_by.count;
-                    state.filter.showFollowers.max = state.dataFollow.listUser.length;
-                    if (state.filter.showFollowers.maxStep > state.filter.showFollowers.max) state.filter.showFollowers.maxStep = state.filter.showFollowers.max;
-                    return state;
-                });
-
-                setTimeout(function () {
-                    var state = _store2.default.getState();
-                    if (data.data.data.user.edge_followed_by.page_info.has_next_page && state.dataFollow.listUser.length <= state.filter.limit && state.filter.limit > state.filter.pageSize) {
-                        _this2.getListFollow(data.data.data.user.edge_followed_by.page_info.end_cursor);
-                    } else {
-                        _store2.default.setState(function (state) {
-                            state.loading_get_list_user = false;
-                            return state;
-                        });
-                    }
-                }, 1000);
-            }
-        }).catch(function (ex) {
-            alert('Get list user follow failed ', ex);
-            _store2.default.setState(function (state) {
-                state.dataFollow.total = 0;
-                state.loading_get_list_user = false;
-                return state;
-            });
-        });
-    },
-    changeFilter: function changeFilter(which, value) {
-        _store2.default.setState(function (state) {
-            if (which === 'keywords') {
-                state.filter[which] = value;
-            } else if (which === 'showFollowers') {
-                state.filter[which] = Object.assign({}, state.filter[which], value);
-            } else if (which === 'limit') {
-                value = parseInt(value);
-                if (isNaN(value) || value <= 0) value = 0;
-                state.filter[which] = value;
-            } else if (which === 'showFollowed') {
-                state.filter[which] = !state.filter[which];
-            }
-            return state;
-        });
-    },
-    changeConfigure: function changeConfigure(which, value) {
-        _store2.default.setState(function (state) {
-            if (which === 'is_random') {
-                state.configure[which] = !state.configure[which];
-            } else {
-                value = parseInt(value);
-                if (isNaN(value) || value <= 0) value = 0;
-                state.configure[which] = value;
-            }
-            return state;
-        });
-    },
-    randomUserId: function randomUserId() {
-        var state = _store2.default.getState();
-        var _listUser = state.dataFollow.listUser.filter(function (item, index) {
-            return item.node.followed_by_viewer === false && item.node.requested_by_viewer === false && item.node.is_verified === false;
-        }).filter(function (item, index) {
-            return state.filter.showFollowers.min <= index <= state.filter.showFollowers.max;
-        }).filter(function (item) {
-            return item.node.id !== state.infoAccount.id;
-        });
-        if (_listUser.length === 0) return null;
-        if (_listUser.length === 1) return _listUser[0].node.id;
-        var index = _utils2.default.randomIntFromTo(0, _listUser.length - 1);
-        console.log('===', index, _listUser);
-
-        if (index <= _listUser.length) return _listUser[index].node.id;else this.randomUserId();
-    },
-    followAll: function followAll() {
-        var _this3 = this;
-
-        var userId = this.randomUserId();
-        if (!userId) return _store2.default.setState(function (state) {
-            state.loading_follow_list_user = false;
-            return state;
-        });
-        _store2.default.setState(function (state) {
-            state.loading_follow_list_user = true;
-            return state;
-        });
-        _API2.default.followAll(userId, _store2.default.getState().infoAccount.token).then(function (data) {
-            if (data.data.status === 'ok') {
-                _store2.default.setState(function (state) {
-                    state.dataFollow.listUser.map(function (item, index) {
-                        if (item.node.id === userId) {
-                            item.node.followed_by_viewer = true;
-                        }
-                        return item;
-                    });
-                    state.configure.countFollow += 1;
-                    return state;
-                });
-
-                var configure = _store2.default.getState().configure;
-                var min = configure.wait_between_actions;
-                if (configure.countFollow % 15 === 0) {
-                    // follow 15 times => delay
-                    min = configure.wait_minus_after_sort;
-                }
-                var max = min + min * (configure.random_wait / 100);
-                var timeOut = _utils2.default.randomIntFromTo(min, max);
-                var timer = timeOut / 100;
-                var interval = setInterval(function () {
-                    _store2.default.setState(function (state) {
-                        state.progress += 1;
-                        return state;
-                    });
-                }, timer * 1000);
-                setTimeout(function () {
-                    _store2.default.setState(function (state) {
-                        state.progress = 0;
-                        return state;
-                    });
-                    clearInterval(interval);
-                    _this3.followAll();
-                }, timeOut * 1000);
-            }
-        }).catch(function (ex) {
-            alert('Follow userid ' + userId + ' failed', ex);
-            var configure = _store2.default.getState().configure;
-            var min = configure.wait_between_actions;
-            if (configure.countFollow % 15 === 0) {
-                // follow 15 times => delay
-                min = configure.wait_minus_after_sort;
-            }
-            var max = min + min * (configure.random_wait / 100);
-            var timeOut = _utils2.default.randomIntFromTo(min, max);
-            setTimeout(function () {
-                _this3.followAll();
-            }, timeOut * 1000);
-        });
-    },
-    setShowFollowed: function setShowFollowed(is) {
-        _store2.default.setState(function (state) {
-            state.filter.showFollowed = is;
-            return state;
-        });
-    }
-};
-
-exports.default = Actions;
 
 /***/ }),
 /* 14 */
@@ -2504,7 +2523,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(9);
+var _propTypes = __webpack_require__(10);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -2568,7 +2587,7 @@ var _store = __webpack_require__(5);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _actions = __webpack_require__(13);
+var _actions = __webpack_require__(7);
 
 var _actions2 = _interopRequireDefault(_actions);
 
@@ -2676,7 +2695,7 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
  * LICENSE file in the root directory of this source tree.
  */
 
-var m=__webpack_require__(6),n=__webpack_require__(3),p=__webpack_require__(7),q=__webpack_require__(4),r="function"===typeof Symbol&&Symbol["for"],t=r?Symbol["for"]("react.element"):60103,u=r?Symbol["for"]("react.portal"):60106,v=r?Symbol["for"]("react.fragment"):60107,w=r?Symbol["for"]("react.strict_mode"):60108,x=r?Symbol["for"]("react.provider"):60109,y=r?Symbol["for"]("react.context"):60110,z=r?Symbol["for"]("react.async_mode"):60111,A=r?Symbol["for"]("react.forward_ref"):
+var m=__webpack_require__(6),n=__webpack_require__(3),p=__webpack_require__(8),q=__webpack_require__(4),r="function"===typeof Symbol&&Symbol["for"],t=r?Symbol["for"]("react.element"):60103,u=r?Symbol["for"]("react.portal"):60106,v=r?Symbol["for"]("react.fragment"):60107,w=r?Symbol["for"]("react.strict_mode"):60108,x=r?Symbol["for"]("react.provider"):60109,y=r?Symbol["for"]("react.context"):60110,z=r?Symbol["for"]("react.async_mode"):60111,A=r?Symbol["for"]("react.forward_ref"):
 60112,B="function"===typeof Symbol&&Symbol.iterator;function C(a){for(var b=arguments.length-1,e="http://reactjs.org/docs/error-decoder.html?invariant\x3d"+a,c=0;c<b;c++)e+="\x26args[]\x3d"+encodeURIComponent(arguments[c+1]);n(!1,"Minified React error #"+a+"; visit %s for the full message or use the non-minified dev environment for full errors and additional helpful warnings. ",e)}var D={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}};
 function E(a,b,e){this.props=a;this.context=b;this.refs=p;this.updater=e||D}E.prototype.isReactComponent={};E.prototype.setState=function(a,b){"object"!==typeof a&&"function"!==typeof a&&null!=a?C("85"):void 0;this.updater.enqueueSetState(this,a,b,"setState")};E.prototype.forceUpdate=function(a){this.updater.enqueueForceUpdate(this,a,"forceUpdate")};function F(){}F.prototype=E.prototype;function G(a,b,e){this.props=a;this.context=b;this.refs=p;this.updater=e||D}var H=G.prototype=new F;
 H.constructor=G;m(H,E.prototype);H.isPureReactComponent=!0;var I={current:null},J=Object.prototype.hasOwnProperty,K={key:!0,ref:!0,__self:!0,__source:!0};
@@ -2715,10 +2734,10 @@ if (process.env.NODE_ENV !== "production") {
 
 var _assign = __webpack_require__(6);
 var invariant = __webpack_require__(3);
-var emptyObject = __webpack_require__(7);
-var warning = __webpack_require__(8);
+var emptyObject = __webpack_require__(8);
+var warning = __webpack_require__(9);
 var emptyFunction = __webpack_require__(4);
-var checkPropTypes = __webpack_require__(11);
+var checkPropTypes = __webpack_require__(12);
 
 // TODO: this is special because it gets imported during build.
 
@@ -4130,7 +4149,7 @@ module.exports = react;
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var ba=__webpack_require__(3),ea=__webpack_require__(0),m=__webpack_require__(17),A=__webpack_require__(6),C=__webpack_require__(4),fa=__webpack_require__(18),ha=__webpack_require__(19),ja=__webpack_require__(20),ka=__webpack_require__(7);
+var ba=__webpack_require__(3),ea=__webpack_require__(0),m=__webpack_require__(17),A=__webpack_require__(6),C=__webpack_require__(4),fa=__webpack_require__(18),ha=__webpack_require__(19),ja=__webpack_require__(20),ka=__webpack_require__(8);
 function D(a){for(var b=arguments.length-1,c="http://reactjs.org/docs/error-decoder.html?invariant\x3d"+a,d=0;d<b;d++)c+="\x26args[]\x3d"+encodeURIComponent(arguments[d+1]);ba(!1,"Minified React error #"+a+"; visit %s for the full message or use the non-minified dev environment for full errors and additional helpful warnings. ",c)}ea?void 0:D("227");
 function ma(a,b,c,d,e,f,h,g,k){this._hasCaughtError=!1;this._caughtError=null;var v=Array.prototype.slice.call(arguments,3);try{b.apply(c,v)}catch(l){this._caughtError=l,this._hasCaughtError=!0}}
 var E={_caughtError:null,_hasCaughtError:!1,_rethrowError:null,_hasRethrowError:!1,invokeGuardedCallback:function(a,b,c,d,e,f,h,g,k){ma.apply(E,arguments)},invokeGuardedCallbackAndCatchFirstError:function(a,b,c,d,e,f,h,g,k){E.invokeGuardedCallback.apply(this,arguments);if(E.hasCaughtError()){var v=E.clearCaughtError();E._hasRethrowError||(E._hasRethrowError=!0,E._rethrowError=v)}},rethrowCaughtError:function(){return na.apply(E,arguments)},hasCaughtError:function(){return E._hasCaughtError},clearCaughtError:function(){if(E._hasCaughtError){var a=
@@ -4446,15 +4465,15 @@ if (process.env.NODE_ENV !== "production") {
 
 var invariant = __webpack_require__(3);
 var React = __webpack_require__(0);
-var warning = __webpack_require__(8);
+var warning = __webpack_require__(9);
 var ExecutionEnvironment = __webpack_require__(17);
 var _assign = __webpack_require__(6);
 var emptyFunction = __webpack_require__(4);
-var checkPropTypes = __webpack_require__(11);
+var checkPropTypes = __webpack_require__(12);
 var getActiveElement = __webpack_require__(18);
 var shallowEqual = __webpack_require__(19);
 var containsNode = __webpack_require__(20);
-var emptyObject = __webpack_require__(7);
+var emptyObject = __webpack_require__(8);
 var hyphenateStyleName = __webpack_require__(37);
 var camelizeStyleName = __webpack_require__(39);
 
@@ -22529,7 +22548,7 @@ exports = module.exports = __webpack_require__(27)(false);
 
 
 // module
-exports.push([module.i, "#follow-instagram-310594, article, div, footer, header, main, nav, section {\n    -ms-flex-align: stretch;\n    align-items: stretch;\n    border: 0 solid #000;\n    box-sizing: border-box;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n    flex-direction: column;\n    -ms-flex-negative: 0;\n    flex-shrink: 0;\n    margin: 0;\n    padding: 0;\n    position: relative;\n}\n\na, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {\n    margin: 0;\n    padding: 0;\n    border: 0;\n    font: inherit;\n    vertical-align: baseline;\n}\n\nbody, button, input, textarea {\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    font-size: 14px;\n    line-height: 18px;\n}\n\n#show-follow-instagram-popup .popup-container {\n    background-color: rgba(0, 0, 0, .5);\n    bottom: 0;\n    -ms-flex-pack: justify;\n    justify-content: space-between;\n    left: 0;\n    overflow-y: auto;\n    -webkit-overflow-scrolling: touch;\n    position: fixed;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n}\n\n#show-follow-instagram-popup .popup-container .progress {\n    height: 2px;\n    transition: width .2s, opacity .4s;\n    opacity: 1;\n    z-index: 999999;\n    background-color: rgb(84, 136, 199);\n}\n\n#show-follow-instagram-popup .popup-container .close-popup {\n    background: 0 0;\n    border: 0;\n    cursor: pointer;\n    height: 36px;\n    outline: 0;\n    overflow: hidden;\n    position: absolute;\n    right: -10px;\n    top: -15px;\n    z-index: 100000;\n}\n\n#show-follow-instagram-popup .popup-container .close-popup::before {\n    color: black;\n    content: '\\D7';\n    display: block;\n    font-size: 36px;\n    font-weight: 600;\n    line-height: 36px;\n    padding: 0;\n    margin: 0;\n}\n\n#follow-instagram-310594 .follow-container {\n    position: fixed;\n    top: 150px;\n    left: 10px;\n    background-repeat: no-repeat;\n    height: 50px;\n    width: 50px;\n    cursor: pointer;\n}\n\n#show-follow-instagram-popup #BotInjectedContainer {\n    display: -ms-flexbox;\n    display: flex;\n    vertical-align: baseline;\n    background-color: rgb(254, 254, 254);\n    position: fixed;\n    width: 98%;\n    top: 3%;\n    left: 1%;\n    z-index: 9999;\n    height: 94%;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    -ms-flex-align: start;\n        align-items: flex-start;\n    -ms-flex-line-pack: start;\n        align-content: flex-start;\n    resize: both;\n    margin: 0px;\n    font: inherit;\n    border-width: 1px;\n    border-style: solid;\n    border-color: rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    padding: 1%;\n}\n\n#BotInjectedContainer .container-wrapper {\n    height: 100%;\n    width: 100%;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    /*overflow-x: auto;*/\n    /*overflow-y: hidden;*/\n\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap {\n    height: 50px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap h1 {\n    font-size: 28px;\n    line-height: 28px;\n    font-weight: bold;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .content-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    height: calc(100% - 77px);\n    -ms-flex-direction: row;\n        flex-direction: row;\n}\n\n#BotInjectedContainer .content-wrap .left-panel-wrapper {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    width: 100%;\n    max-width: 100%;\n    overflow-y: auto;\n    overflow-x: hidden;\n    min-height: 70%;\n    max-height: 100%;\n}\n\n#show-follow-instagram-popup .popup-container .left-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n        flex-direction: column;\n    width: calc(100% - 400px);\n    max-width: calc(100% - 400px);\n    min-height: 70%;\n}\n\n#BotInjectedContainer .content-wrap .list-item {\n    width: 245px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: nowrap;\n        flex-wrap: nowrap;\n    -ms-flex-align: center;\n        align-items: center;\n    margin: 0 10px 10px 0;\n    height: 66px;\n}\n\n#BotInjectedContainer .content-wrap .list-item.selected-item {\n    border: 2px solid red;\n    border-radius: 5%;\n}\n\n#BotInjectedContainer .content-wrap .list-item img.avatar {\n    width: 50px;\n    height: 50px;\n    border-width: 4px;\n    border-style: solid;\n    border-color: white;\n    -o-border-image: initial;\n       border-image: initial;\n    border-radius: 10px;\n    margin: 0 3px 0 0;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user {\n    width: 100%;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-avatar {\n    cursor: pointer;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a {\n    color: #003569;\n    text-decoration: none;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {\n    width: calc(100% - 60px);\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n@media only screen and (max-width: 820px) {\n    #BotInjectedContainer .content-wrap {\n        -ms-flex-direction: column-reverse;\n            flex-direction: column-reverse;\n        overflow: auto;\n    }\n\n    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper, #BotInjectedContainer .content-wrap .left-wrap {\n        width: 100% !important;\n        max-width: 100% !important;\n    }\n\n}\n\n.multi-actions-button {\n    text-align: center;\n    color: white;\n    background-color: #00807f;\n    font-weight: bold;\n    cursor: pointer;\n    width: 100%;\n    margin: 5px 0 15px 0;\n    border-radius: 3px;\n    padding: 8px 0;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper {\n    width: 380px;\n    min-width: 380px;\n    display: -ms-flexbox;\n    display: flex;\n    padding: 15px;\n    overflow-y: auto;\n    overflow-x: hidden;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .config-options {\n    padding: 8px 0px 5px 10px;\n    border: 1px dashed rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .row-info {\n    margin-bottom: 15px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: unset;\n        flex-direction: unset;\n    -ms-flex-align: center;\n        align-items: center;\n    padding-right: 13px;\n}\n\n#BotInjectedContainer .row-info.input-range {\n    padding: 15px 20px 15px 6px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"number\"] {\n    width: 50px;\n    margin: 0 5px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"checkbox\"] {\n    width: 15px;\n    height: 15px;\n\n}\n\n#BotInjectedContainer input[type=\"text\"], #BotInjectedContainer input[type=\"number\"] {\n    width: 100%;\n    min-height: 30px;\n    border: 1px solid #b5b3b3;\n    border-radius: 4px;\n    padding: 5px 10px;\n    color: #333;\n    font: normal 13px Arial;\n    background-color: #fff;\n    display: block;\n    transition: border-color 0.2s ease-out;\n}\n\n.input-range__label {\n    color: #035a33 !important;\n}\n\n.show-total-accounts{\n    display:-ms-flexbox;\n    display:flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n}\n\n.show-total-accounts span {\n    margin-right: 10px;\n}\n\n.show-total-accounts span:last-of-type {\n    margin-right: 0;\n}\n\n\n.show-total-accounts span b {\n    color:green;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow{\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n    -ms-flex-pack: justify;\n        justify-content: space-between;\n}\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{\n    width: 48%;\n}", ""]);
+exports.push([module.i, "#follow-instagram-310594, article, div, footer, header, main, nav, section {\n    -ms-flex-align: stretch;\n    align-items: stretch;\n    border: 0 solid #000;\n    box-sizing: border-box;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n    flex-direction: column;\n    -ms-flex-negative: 0;\n    flex-shrink: 0;\n    margin: 0;\n    padding: 0;\n    position: relative;\n}\n\na, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {\n    margin: 0;\n    padding: 0;\n    border: 0;\n    font: inherit;\n    vertical-align: baseline;\n}\n\nbody, button, input, textarea {\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    font-size: 14px;\n    line-height: 18px;\n}\n\n#show-follow-instagram-popup .popup-container {\n    background-color: rgba(0, 0, 0, .5);\n    bottom: 0;\n    -ms-flex-pack: justify;\n    justify-content: space-between;\n    left: 0;\n    overflow-y: auto;\n    -webkit-overflow-scrolling: touch;\n    position: fixed;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n}\n\n#show-follow-instagram-popup .popup-container .progress {\n    height: 2px;\n    transition: width .2s, opacity .4s;\n    opacity: 1;\n    z-index: 999999;\n    background-color: rgb(84, 136, 199);\n}\n\n#show-follow-instagram-popup .popup-container .close-popup {\n    background: 0 0;\n    border: 0;\n    cursor: pointer;\n    height: 36px;\n    outline: 0;\n    overflow: hidden;\n    position: absolute;\n    right: -10px;\n    top: -15px;\n    z-index: 100000;\n}\n\n#show-follow-instagram-popup .popup-container .close-popup::before {\n    color: black;\n    content: '\\D7';\n    display: block;\n    font-size: 36px;\n    font-weight: 600;\n    line-height: 36px;\n    padding: 0;\n    margin: 0;\n}\n\n#follow-instagram-310594 .follow-container {\n    position: fixed;\n    top: 150px;\n    left: 10px;\n    background-repeat: no-repeat;\n    height: 50px;\n    width: 50px;\n    cursor: pointer;\n}\n\n#show-follow-instagram-popup #BotInjectedContainer {\n    display: -ms-flexbox;\n    display: flex;\n    vertical-align: baseline;\n    background-color: rgb(254, 254, 254);\n    position: fixed;\n    width: 98%;\n    top: 3%;\n    left: 1%;\n    z-index: 9999;\n    height: 94%;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    -ms-flex-align: start;\n        align-items: flex-start;\n    -ms-flex-line-pack: start;\n        align-content: flex-start;\n    resize: both;\n    margin: 0px;\n    font: inherit;\n    border-width: 1px;\n    border-style: solid;\n    border-color: rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    padding: 1%;\n}\n\n#BotInjectedContainer .container-wrapper {\n    height: 100%;\n    width: 100%;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    /*overflow-x: auto;*/\n    /*overflow-y: hidden;*/\n\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap {\n    height: 50px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap h1 {\n    font-size: 28px;\n    line-height: 28px;\n    font-weight: bold;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .content-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    height: calc(100% - 77px);\n    -ms-flex-direction: row;\n        flex-direction: row;\n}\n\n#BotInjectedContainer .content-wrap .left-panel-wrapper {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    width: 100%;\n    max-width: 100%;\n    overflow-y: auto;\n    overflow-x: hidden;\n    min-height: 70%;\n    max-height: 100%;\n}\n\n#show-follow-instagram-popup .popup-container .left-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n        flex-direction: column;\n    width: calc(100% - 400px);\n    max-width: calc(100% - 400px);\n    min-height: 70%;\n}\n\n#BotInjectedContainer .content-wrap .list-item {\n    width: 245px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: nowrap;\n        flex-wrap: nowrap;\n    -ms-flex-align: center;\n        align-items: center;\n    margin: 0 10px 10px 0;\n    height: 66px;\n}\n\n#BotInjectedContainer .content-wrap .list-item.selected-item {\n    border: 2px solid red;\n    border-radius: 5%;\n}\n\n#BotInjectedContainer .content-wrap .list-item img.avatar {\n    width: 50px;\n    height: 50px;\n    border-width: 4px;\n    border-style: solid;\n    border-color: white;\n    -o-border-image: initial;\n       border-image: initial;\n    border-radius: 10px;\n    margin: 0 3px 0 0;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user {\n    width: 100%;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-avatar {\n    cursor: pointer;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a {\n    color: #003569;\n    text-decoration: none;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {\n    width: calc(100% - 60px);\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n@media only screen and (max-width: 820px) {\n    #BotInjectedContainer .content-wrap {\n        -ms-flex-direction: column-reverse;\n            flex-direction: column-reverse;\n        overflow: auto;\n    }\n\n    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper, #BotInjectedContainer .content-wrap .left-wrap {\n        width: 100% !important;\n        max-width: 100% !important;\n    }\n\n}\n\n.multi-actions-button {\n    text-align: center;\n    color: white;\n    background-color: #00807f;\n    font-weight: bold;\n    cursor: pointer;\n    width: 100%;\n    margin: 5px 0 15px 0;\n    border-radius: 3px;\n    padding: 8px 0;\n}\n\n.multi-actions-button.stop{\n    background: red;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper {\n    width: 380px;\n    min-width: 380px;\n    display: -ms-flexbox;\n    display: flex;\n    padding: 15px;\n    overflow-y: auto;\n    overflow-x: hidden;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .config-options {\n    padding: 8px 0px 5px 10px;\n    border: 1px dashed rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .row-info {\n    margin-bottom: 15px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: unset;\n        flex-direction: unset;\n    -ms-flex-align: center;\n        align-items: center;\n    padding-right: 13px;\n}\n\n#BotInjectedContainer .row-info.input-range {\n    padding: 15px 20px 15px 6px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"number\"] {\n    width: 50px;\n    margin: 0 5px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"checkbox\"] {\n    width: 15px;\n    height: 15px;\n\n}\n\n#BotInjectedContainer input[type=\"text\"], #BotInjectedContainer input[type=\"number\"] {\n    width: 100%;\n    min-height: 30px;\n    border: 1px solid #b5b3b3;\n    border-radius: 4px;\n    padding: 5px 10px;\n    color: #333;\n    font: normal 13px Arial;\n    background-color: #fff;\n    display: block;\n    transition: border-color 0.2s ease-out;\n}\n\n.input-range__label {\n    color: #035a33 !important;\n}\n\n.show-total-accounts{\n    display:-ms-flexbox;\n    display:flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n}\n\n.show-total-accounts span {\n    margin-right: 10px;\n}\n\n.show-total-accounts span:last-of-type {\n    margin-right: 0;\n}\n\n\n.show-total-accounts span b {\n    color:green;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow{\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n    -ms-flex-pack: justify;\n        justify-content: space-between;\n}\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{\n    width: 48%;\n}", ""]);
 
 // exports
 
@@ -22654,7 +22673,7 @@ var _store = __webpack_require__(5);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _actions = __webpack_require__(13);
+var _actions = __webpack_require__(7);
 
 var _actions2 = _interopRequireDefault(_actions);
 
@@ -22666,7 +22685,7 @@ var _rightPanelWrapper = __webpack_require__(70);
 
 var _rightPanelWrapper2 = _interopRequireDefault(_rightPanelWrapper);
 
-var _progressNoti = __webpack_require__(91);
+var _progressNoti = __webpack_require__(93);
 
 var _progressNoti2 = _interopRequireDefault(_progressNoti);
 
@@ -22710,6 +22729,8 @@ var PopupContainer = _store2.default.connect(function (_React$Component) {
 
             var listUser = this.props.dataFollow.listUser.filter(function (item, index) {
                 return _this2.props.filter.showFollowers.min <= index && _this2.props.filter.showFollowers.max > index;
+            }).filter(function (item) {
+                return item.node.id !== _this2.props.infoAccount.id;
             });
             var userFollowing = listUser.filter(function (item, index) {
                 return item.node.followed_by_viewer === false && item.node.requested_by_viewer === false && item.node.is_verified === false;
@@ -22788,6 +22809,7 @@ var PopupContainer = _store2.default.connect(function (_React$Component) {
     return _class;
 }(_react2.default.Component), function (appState) {
     return {
+        infoAccount: appState.infoAccount,
         dataFollow: appState.dataFollow,
         filter: appState.filter
     };
@@ -22933,7 +22955,7 @@ var _store = __webpack_require__(5);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _actions = __webpack_require__(13);
+var _actions = __webpack_require__(7);
 
 var _actions2 = _interopRequireDefault(_actions);
 
@@ -22942,6 +22964,14 @@ var _reactInputRange = __webpack_require__(71);
 var _reactInputRange2 = _interopRequireDefault(_reactInputRange);
 
 __webpack_require__(89);
+
+var _buttonFollowAll = __webpack_require__(91);
+
+var _buttonFollowAll2 = _interopRequireDefault(_buttonFollowAll);
+
+var _buttonLoadFollowers = __webpack_require__(92);
+
+var _buttonLoadFollowers2 = _interopRequireDefault(_buttonLoadFollowers);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22980,7 +23010,7 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
     }, {
         key: 'handleLoadFollowers',
         value: function handleLoadFollowers() {
-            if (this.props.loading_get_list_user) return;
+            if (this.props.loading_get_list_user_followers) return;
             var userId = this.state.userId;
             if (!userId) {
                 this.setState({ message: 'Please enter user id ' });
@@ -23006,12 +23036,18 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
             );
         }
     }, {
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            if (this.checkboxFollowed) {
+                this.checkboxFollowed.checked = this.props.showFollowed;
+            }
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this2 = this;
 
             var props = this.props;
-            console.log(props);
             return _react2.default.createElement(
                 'div',
                 { className: 'right-panel-wrapper' },
@@ -23064,30 +23100,21 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                 _react2.default.createElement(
                     'div',
                     { className: 'load-follow' },
+                    _react2.default.createElement(_buttonLoadFollowers2.default, { loading: props.loading_get_list_user_followers, handleLoadFollowers: this.handleLoadFollowers }),
                     _react2.default.createElement(
                         'div',
                         { className: 'multi-actions-button', onClick: this.handleLoadFollowers },
                         _react2.default.createElement(
                             'span',
                             null,
-                            props.loading_get_list_user ? _react2.default.createElement('i', { className: 'fa fa-spinner fa-pulse fa-fw' }) : null,
-                            'Load followers'
-                        )
-                    ),
-                    _react2.default.createElement(
-                        'div',
-                        { className: 'multi-actions-button', onClick: this.handleLoadFollowers },
-                        _react2.default.createElement(
-                            'span',
-                            null,
-                            props.loading_get_list_user ? _react2.default.createElement('i', { className: 'fa fa-spinner fa-pulse fa-fw' }) : null,
+                            props.loading_get_list_user_followers ? _react2.default.createElement('i', { className: 'fa fa-spinner fa-pulse fa-fw' }) : null,
                             'Load following'
                         )
                     )
                 ),
                 _react2.default.createElement(
                     'details',
-                    { className: 'config-wrapper' },
+                    { className: 'config-wrapper', open: true },
                     _react2.default.createElement(
                         'summary',
                         null,
@@ -23111,10 +23138,15 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'row-info' },
-                            'Show user followers:',
-                            _react2.default.createElement('input', { type: 'checkbox', defaultChecked: props.showFollowed, onChange: function onChange(e) {
+                            'Show user followed:',
+                            _react2.default.createElement('input', { type: 'checkbox', defaultChecked: props.showFollowed,
+                                ref: function ref(el) {
+                                    _this2.checkboxFollowed = el;
+                                },
+                                onChange: function onChange(e) {
                                     _actions2.default.changeFilter('showFollowed', e.target.value);
-                                } })
+                                }
+                            })
                         ),
                         _react2.default.createElement(
                             'div',
@@ -23160,9 +23192,6 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'row-info' },
-                            _react2.default.createElement('input', { type: 'checkbox', defaultChecked: props.is_random, onChange: function onChange(e) {
-                                    _actions2.default.changeConfigure('is_random', e.target.value);
-                                } }),
                             'Randomize wait time by up to:',
                             _react2.default.createElement('input', { type: 'number', value: props.random_wait,
                                 onChange: function onChange(e) {
@@ -23184,20 +23213,7 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                         )
                     )
                 ),
-                _react2.default.createElement(
-                    'div',
-                    { className: 'multi-actions-button', onClick: function onClick(e) {
-                            if (_this2.props.loading_follow_list_user) return;
-                            _actions2.default.setShowFollowed(false);
-                            _actions2.default.followAll();
-                        } },
-                    _react2.default.createElement(
-                        'span',
-                        null,
-                        props.loading_follow_list_user ? _react2.default.createElement('i', { className: 'fa fa-spinner fa-pulse fa-fw' }) : null,
-                        'Follow all'
-                    )
-                )
+                _react2.default.createElement(_buttonFollowAll2.default, { loading: this.props.loading_follow_list_user })
             );
         }
     }]);
@@ -23206,7 +23222,7 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
 }(_react2.default.Component), function (appState) {
     var configure = appState.configure;
     return {
-        loading_get_list_user: appState.loading_get_list_user,
+        loading_get_list_user_followers: appState.loading_get_list_user_followers,
         loading_follow_list_user: appState.loading_follow_list_user,
         showFollowers: appState.filter.showFollowers,
         showFollowed: appState.filter.showFollowed,
@@ -23304,7 +23320,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(9);
+var _propTypes = __webpack_require__(10);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -23340,7 +23356,7 @@ var _track = __webpack_require__(87);
 
 var _track2 = _interopRequireDefault(_track);
 
-var _utils = __webpack_require__(10);
+var _utils = __webpack_require__(11);
 
 var _keyCodes = __webpack_require__(88);
 
@@ -24206,11 +24222,11 @@ module.exports = exports['default'];
 
 var emptyFunction = __webpack_require__(4);
 var invariant = __webpack_require__(3);
-var warning = __webpack_require__(8);
+var warning = __webpack_require__(9);
 var assign = __webpack_require__(6);
 
-var ReactPropTypesSecret = __webpack_require__(12);
-var checkPropTypes = __webpack_require__(11);
+var ReactPropTypesSecret = __webpack_require__(13);
+var checkPropTypes = __webpack_require__(12);
 
 module.exports = function(isValidElement, throwOnDirectAccess) {
   /* global Symbol */
@@ -24756,7 +24772,7 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
 
 var emptyFunction = __webpack_require__(4);
 var invariant = __webpack_require__(3);
-var ReactPropTypesSecret = __webpack_require__(12);
+var ReactPropTypesSecret = __webpack_require__(13);
 
 module.exports = function() {
   function shim(props, propName, componentName, location, propFullName, secret) {
@@ -24828,7 +24844,7 @@ exports.getPositionsFromValues = getPositionsFromValues;
 exports.getPositionFromEvent = getPositionFromEvent;
 exports.getStepValueFromValue = getStepValueFromValue;
 
-var _utils = __webpack_require__(10);
+var _utils = __webpack_require__(11);
 
 /**
  * Convert a point into a percentage value
@@ -25191,7 +25207,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = rangePropType;
 
-var _utils = __webpack_require__(10);
+var _utils = __webpack_require__(11);
 
 /**
  * @ignore
@@ -25226,7 +25242,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = valuePropType;
 
-var _utils = __webpack_require__(10);
+var _utils = __webpack_require__(11);
 
 /**
  * @ignore
@@ -25274,7 +25290,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(9);
+var _propTypes = __webpack_require__(10);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -25678,7 +25694,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(9);
+var _propTypes = __webpack_require__(10);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -26030,6 +26046,160 @@ exports.push([module.i, ".input-range__slider {\n  -webkit-appearance: none;\n  
 
 /***/ }),
 /* 91 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _actions = __webpack_require__(7);
+
+var _actions2 = _interopRequireDefault(_actions);
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ButtonFollow = function (_React$Component) {
+    _inherits(ButtonFollow, _React$Component);
+
+    function ButtonFollow() {
+        _classCallCheck(this, ButtonFollow);
+
+        return _possibleConstructorReturn(this, (ButtonFollow.__proto__ || Object.getPrototypeOf(ButtonFollow)).apply(this, arguments));
+    }
+
+    _createClass(ButtonFollow, [{
+        key: "render",
+        value: function render() {
+            var loading = this.props.loading;
+            if (loading) return _react2.default.createElement(
+                "div",
+                { className: "multi-actions-button stop",
+                    onClick: function onClick(e) {
+                        _actions2.default.stopFollowAll();
+                    }
+                },
+                _react2.default.createElement(
+                    "span",
+                    null,
+                    _react2.default.createElement("i", { className: "fa fa-spinner fa-pulse fa-fw" }),
+                    "Stop follow"
+                )
+            );
+
+            return _react2.default.createElement(
+                "div",
+                { className: "multi-actions-button",
+                    onClick: function onClick(e) {
+                        if (loading) return;
+                        _actions2.default.setShowFollowed(false);
+                        _actions2.default.followAll();
+                    }
+                },
+                _react2.default.createElement(
+                    "span",
+                    null,
+                    "Follow all"
+                )
+            );
+        }
+    }]);
+
+    return ButtonFollow;
+}(_react2.default.Component);
+
+exports.default = ButtonFollow;
+
+/***/ }),
+/* 92 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _actions = __webpack_require__(7);
+
+var _actions2 = _interopRequireDefault(_actions);
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ButtonFollow = function (_React$Component) {
+    _inherits(ButtonFollow, _React$Component);
+
+    function ButtonFollow() {
+        _classCallCheck(this, ButtonFollow);
+
+        return _possibleConstructorReturn(this, (ButtonFollow.__proto__ || Object.getPrototypeOf(ButtonFollow)).apply(this, arguments));
+    }
+
+    _createClass(ButtonFollow, [{
+        key: "render",
+        value: function render() {
+            var loading = this.props.loading;
+            if (loading) return _react2.default.createElement(
+                "div",
+                { className: "multi-actions-button stop",
+                    onClick: function onClick(e) {
+                        _actions2.default.stopLoadFollowers();
+                    }
+                },
+                _react2.default.createElement(
+                    "span",
+                    null,
+                    _react2.default.createElement("i", { className: "fa fa-spinner fa-pulse fa-fw" }),
+                    "Stop load followers"
+                )
+            );
+
+            return _react2.default.createElement(
+                "div",
+                { className: "multi-actions-button", onClick: this.props.handleLoadFollowers },
+                _react2.default.createElement(
+                    "span",
+                    null,
+                    "Load followers"
+                )
+            );
+        }
+    }]);
+
+    return ButtonFollow;
+}(_react2.default.Component);
+
+exports.default = ButtonFollow;
+
+/***/ }),
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
