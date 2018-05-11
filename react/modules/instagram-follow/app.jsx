@@ -35,8 +35,8 @@ const App = Store.connect(class App extends React.Component {
             iDiv.id = 'show-follow-instagram-popup';
             document.getElementsByTagName('body')[0].appendChild(iDiv);
         }
-
-        ReactDom.render(<PopupContainer display="unset"/>, document.getElementById('show-follow-instagram-popup'));
+        Action.showPopup(true);
+        ReactDom.render(<PopupContainer/>, document.getElementById('show-follow-instagram-popup'));
     }
 
     render() {

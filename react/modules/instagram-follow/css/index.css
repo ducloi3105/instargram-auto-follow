@@ -59,6 +59,7 @@ body, button, input, textarea {
     opacity: 1;
     z-index: 999999;
     background-color: rgb(84, 136, 199);
+    max-width: 100%;
 }
 
 #show-follow-instagram-popup .popup-container .close-popup {

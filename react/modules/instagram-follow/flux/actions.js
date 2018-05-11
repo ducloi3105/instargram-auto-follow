@@ -160,6 +160,8 @@ const Actions = {
     },
 
     followAll() {
+        clearTimeout(timeoutFollowAll);
+        clearTimeout(intervalProgress);
         let userId = this.randomUserId();
         if (!userId) return Store.setState(state => {
             state.loading_follow_list_user = false;
@@ -210,6 +212,10 @@ const Actions = {
         }, timer * 1000);
 
         timeoutFollowAll = setTimeout(() => {
+            Store.setState(state => {
+                state.progress = 0;
+                return state;
+            })
             this.followAll();
         }, timeOut * 1000)
     },
@@ -227,7 +233,7 @@ const Actions = {
             return state;
         });
         clearTimeout(timeoutFollowAll);
-        clearInterval(intervalProgress);
+        clearTimeout(intervalProgress);
     },
 
     stopLoadFollowers(){
@@ -249,6 +255,12 @@ const Actions = {
             state.query_hash_which = is;
             return state;
         });
+    },
+    showPopup(is){
+        Store.setState(state => {
+            state.showPopup = is;
+            return state;
+        })
     }
 };
 

@@ -43,7 +43,8 @@ let state = {
     loading_get_list_user_followers: false,
     loading_get_list_user_following: false,
     loading_follow_list_user: false,
-    progress: 0
+    progress: 0,
+    showPopup: true
 
 };
 

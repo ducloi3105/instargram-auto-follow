@@ -675,7 +675,8 @@ var state = {
     loading_get_list_user_followers: false,
     loading_get_list_user_following: false,
     loading_follow_list_user: false,
-    progress: 0
+    progress: 0,
+    showPopup: true
 
 };
 
@@ -964,6 +965,8 @@ var Actions = {
     followAll: function followAll() {
         var _this3 = this;
 
+        clearTimeout(timeoutFollowAll);
+        clearTimeout(intervalProgress);
         var userId = this.randomUserId();
         if (!userId) return _store2.default.setState(function (state) {
             state.loading_follow_list_user = false;
@@ -1016,6 +1019,10 @@ var Actions = {
         }, timer * 1000);
 
         timeoutFollowAll = setTimeout(function () {
+            _store2.default.setState(function (state) {
+                state.progress = 0;
+                return state;
+            });
             _this4.followAll();
         }, timeOut * 1000);
     },
@@ -1032,7 +1039,7 @@ var Actions = {
             return state;
         });
         clearTimeout(timeoutFollowAll);
-        clearInterval(intervalProgress);
+        clearTimeout(intervalProgress);
     },
     stopLoadFollowers: function stopLoadFollowers() {
         _store2.default.setState(function (state) {
@@ -1051,6 +1058,12 @@ var Actions = {
     whichFollow: function whichFollow(is) {
         _store2.default.setState(function (state) {
             state.query_hash_which = is;
+            return state;
+        });
+    },
+    showPopup: function showPopup(is) {
+        _store2.default.setState(function (state) {
+            state.showPopup = is;
             return state;
         });
     }
@@ -2652,8 +2665,8 @@ var App = _store2.default.connect(function (_React$Component) {
                 iDiv.id = 'show-follow-instagram-popup';
                 document.getElementsByTagName('body')[0].appendChild(iDiv);
             }
-
-            _reactDom2.default.render(_react2.default.createElement(_popupcontainer2.default, { display: 'unset' }), document.getElementById('show-follow-instagram-popup'));
+            _actions2.default.showPopup(true);
+            _reactDom2.default.render(_react2.default.createElement(_popupcontainer2.default, null), document.getElementById('show-follow-instagram-popup'));
         }
     }, {
         key: 'render',
@@ -22556,7 +22569,7 @@ exports = module.exports = __webpack_require__(27)(false);
 
 
 // module
-exports.push([module.i, "#follow-instagram-310594, article, div, footer, header, main, nav, section {\n    -ms-flex-align: stretch;\n    align-items: stretch;\n    border: 0 solid #000;\n    box-sizing: border-box;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n    flex-direction: column;\n    -ms-flex-negative: 0;\n    flex-shrink: 0;\n    margin: 0;\n    padding: 0;\n    position: relative;\n}\n\na, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {\n    margin: 0;\n    padding: 0;\n    border: 0;\n    font: inherit;\n    vertical-align: baseline;\n}\n\nbody, button, input, textarea {\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    font-size: 14px;\n    line-height: 18px;\n}\n\n#show-follow-instagram-popup .popup-container {\n    background-color: rgba(0, 0, 0, .5);\n    bottom: 0;\n    -ms-flex-pack: justify;\n    justify-content: space-between;\n    left: 0;\n    overflow-y: auto;\n    -webkit-overflow-scrolling: touch;\n    position: fixed;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n}\n\n#show-follow-instagram-popup .popup-container .progress {\n    height: 2px;\n    transition: width .2s, opacity .4s;\n    opacity: 1;\n    z-index: 999999;\n    background-color: rgb(84, 136, 199);\n}\n\n#show-follow-instagram-popup .popup-container .close-popup {\n    background: 0 0;\n    border: 0;\n    cursor: pointer;\n    height: 36px;\n    outline: 0;\n    overflow: hidden;\n    position: absolute;\n    right: -10px;\n    top: -15px;\n    z-index: 100000;\n}\n\n#show-follow-instagram-popup .popup-container .close-popup::before {\n    color: black;\n    content: '\\D7';\n    display: block;\n    font-size: 36px;\n    font-weight: 600;\n    line-height: 36px;\n    padding: 0;\n    margin: 0;\n}\n\n#follow-instagram-310594 .follow-container {\n    position: fixed;\n    top: 150px;\n    left: 10px;\n    background-repeat: no-repeat;\n    height: 50px;\n    width: 50px;\n    cursor: pointer;\n}\n\n#show-follow-instagram-popup #BotInjectedContainer {\n    display: -ms-flexbox;\n    display: flex;\n    vertical-align: baseline;\n    background-color: rgb(254, 254, 254);\n    position: fixed;\n    width: 98%;\n    top: 3%;\n    left: 1%;\n    z-index: 9999;\n    height: 94%;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    -ms-flex-align: start;\n        align-items: flex-start;\n    -ms-flex-line-pack: start;\n        align-content: flex-start;\n    resize: both;\n    margin: 0px;\n    font: inherit;\n    border-width: 1px;\n    border-style: solid;\n    border-color: rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    padding: 1%;\n}\n\n#BotInjectedContainer .container-wrapper {\n    height: 100%;\n    width: 100%;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    /*overflow-x: auto;*/\n    /*overflow-y: hidden;*/\n\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap {\n    height: 50px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap h1 {\n    font-size: 28px;\n    line-height: 28px;\n    font-weight: bold;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .content-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    height: calc(100% - 77px);\n    -ms-flex-direction: row;\n        flex-direction: row;\n}\n\n#BotInjectedContainer .content-wrap .left-panel-wrapper {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    width: 100%;\n    max-width: 100%;\n    overflow-y: auto;\n    overflow-x: hidden;\n    min-height: 70%;\n    max-height: 100%;\n}\n\n#show-follow-instagram-popup .popup-container .left-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n        flex-direction: column;\n    width: calc(100% - 400px);\n    max-width: calc(100% - 400px);\n    min-height: 70%;\n}\n\n#BotInjectedContainer .content-wrap .list-item {\n    width: 245px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: nowrap;\n        flex-wrap: nowrap;\n    -ms-flex-align: center;\n        align-items: center;\n    margin: 0 10px 10px 0;\n    height: 66px;\n}\n\n#BotInjectedContainer .content-wrap .list-item.selected-item {\n    border: 2px solid red;\n    border-radius: 5%;\n}\n\n#BotInjectedContainer .content-wrap .list-item img.avatar {\n    width: 50px;\n    height: 50px;\n    border-width: 4px;\n    border-style: solid;\n    border-color: white;\n    -o-border-image: initial;\n       border-image: initial;\n    border-radius: 10px;\n    margin: 0 3px 0 0;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user {\n    width: 100%;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-avatar {\n    cursor: pointer;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a {\n    color: #003569;\n    text-decoration: none;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {\n    width: calc(100% - 60px);\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n@media only screen and (max-width: 820px) {\n    #BotInjectedContainer .content-wrap {\n        -ms-flex-direction: column-reverse;\n            flex-direction: column-reverse;\n        overflow: auto;\n    }\n\n    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper, #BotInjectedContainer .content-wrap .left-wrap {\n        width: 100% !important;\n        max-width: 100% !important;\n    }\n\n}\n\n.multi-actions-button {\n    text-align: center;\n    color: white;\n    background-color: #00807f;\n    font-weight: bold;\n    cursor: pointer;\n    width: 100%;\n    margin: 5px 0 15px 0;\n    border-radius: 3px;\n    padding: 8px 0;\n}\n\n.multi-actions-button.stop{\n    background: red;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper {\n    width: 380px;\n    min-width: 380px;\n    display: -ms-flexbox;\n    display: flex;\n    padding: 15px;\n    overflow-y: auto;\n    overflow-x: hidden;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .config-options {\n    padding: 8px 0px 5px 10px;\n    border: 1px dashed rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .row-info {\n    margin-bottom: 15px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: unset;\n        flex-direction: unset;\n    -ms-flex-align: center;\n        align-items: center;\n    padding-right: 13px;\n}\n\n#BotInjectedContainer .row-info.input-range {\n    padding: 15px 20px 15px 6px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"number\"] {\n    width: 50px;\n    margin: 0 5px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"checkbox\"] {\n    width: 15px;\n    height: 15px;\n\n}\n\n#BotInjectedContainer input[type=\"text\"], #BotInjectedContainer input[type=\"number\"] {\n    width: 100%;\n    min-height: 30px;\n    border: 1px solid #b5b3b3;\n    border-radius: 4px;\n    padding: 5px 10px;\n    color: #333;\n    font: normal 13px Arial;\n    background-color: #fff;\n    display: block;\n    transition: border-color 0.2s ease-out;\n}\n\n.input-range__label {\n    color: #035a33 !important;\n}\n\n.show-total-accounts{\n    display:-ms-flexbox;\n    display:flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n}\n\n.show-total-accounts span {\n    margin-right: 10px;\n}\n\n.show-total-accounts span:last-of-type {\n    margin-right: 0;\n}\n\n\n.show-total-accounts span b {\n    color:green;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow{\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n    -ms-flex-pack: justify;\n        justify-content: space-between;\n}\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{\n    width: 48%;\n}", ""]);
+exports.push([module.i, "#follow-instagram-310594, article, div, footer, header, main, nav, section {\n    -ms-flex-align: stretch;\n    align-items: stretch;\n    border: 0 solid #000;\n    box-sizing: border-box;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n    flex-direction: column;\n    -ms-flex-negative: 0;\n    flex-shrink: 0;\n    margin: 0;\n    padding: 0;\n    position: relative;\n}\n\na, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {\n    margin: 0;\n    padding: 0;\n    border: 0;\n    font: inherit;\n    vertical-align: baseline;\n}\n\nbody, button, input, textarea {\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    font-size: 14px;\n    line-height: 18px;\n}\n\n#show-follow-instagram-popup .popup-container {\n    background-color: rgba(0, 0, 0, .5);\n    bottom: 0;\n    -ms-flex-pack: justify;\n    justify-content: space-between;\n    left: 0;\n    overflow-y: auto;\n    -webkit-overflow-scrolling: touch;\n    position: fixed;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n}\n\n#show-follow-instagram-popup .popup-container .progress {\n    height: 2px;\n    transition: width .2s, opacity .4s;\n    opacity: 1;\n    z-index: 999999;\n    background-color: rgb(84, 136, 199);\n    max-width: 100%;\n}\n\n#show-follow-instagram-popup .popup-container .close-popup {\n    background: 0 0;\n    border: 0;\n    cursor: pointer;\n    height: 36px;\n    outline: 0;\n    overflow: hidden;\n    position: absolute;\n    right: -10px;\n    top: -15px;\n    z-index: 100000;\n}\n\n#show-follow-instagram-popup .popup-container .close-popup::before {\n    color: black;\n    content: '\\D7';\n    display: block;\n    font-size: 36px;\n    font-weight: 600;\n    line-height: 36px;\n    padding: 0;\n    margin: 0;\n}\n\n#follow-instagram-310594 .follow-container {\n    position: fixed;\n    top: 150px;\n    left: 10px;\n    background-repeat: no-repeat;\n    height: 50px;\n    width: 50px;\n    cursor: pointer;\n}\n\n#show-follow-instagram-popup #BotInjectedContainer {\n    display: -ms-flexbox;\n    display: flex;\n    vertical-align: baseline;\n    background-color: rgb(254, 254, 254);\n    position: fixed;\n    width: 98%;\n    top: 3%;\n    left: 1%;\n    z-index: 9999;\n    height: 94%;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    -ms-flex-align: start;\n        align-items: flex-start;\n    -ms-flex-line-pack: start;\n        align-content: flex-start;\n    resize: both;\n    margin: 0px;\n    font: inherit;\n    border-width: 1px;\n    border-style: solid;\n    border-color: rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    padding: 1%;\n}\n\n#BotInjectedContainer .container-wrapper {\n    height: 100%;\n    width: 100%;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    /*overflow-x: auto;*/\n    /*overflow-y: hidden;*/\n\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap {\n    height: 50px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap h1 {\n    font-size: 28px;\n    line-height: 28px;\n    font-weight: bold;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .content-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    height: calc(100% - 77px);\n    -ms-flex-direction: row;\n        flex-direction: row;\n}\n\n#BotInjectedContainer .content-wrap .left-panel-wrapper {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    width: 100%;\n    max-width: 100%;\n    overflow-y: auto;\n    overflow-x: hidden;\n    min-height: 70%;\n    max-height: 100%;\n}\n\n#show-follow-instagram-popup .popup-container .left-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n        flex-direction: column;\n    width: calc(100% - 400px);\n    max-width: calc(100% - 400px);\n    min-height: 70%;\n}\n\n#BotInjectedContainer .content-wrap .list-item {\n    width: 245px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: nowrap;\n        flex-wrap: nowrap;\n    -ms-flex-align: center;\n        align-items: center;\n    margin: 0 10px 10px 0;\n    height: 66px;\n}\n\n#BotInjectedContainer .content-wrap .list-item.selected-item {\n    border: 2px solid red;\n    border-radius: 5%;\n}\n\n#BotInjectedContainer .content-wrap .list-item img.avatar {\n    width: 50px;\n    height: 50px;\n    border-width: 4px;\n    border-style: solid;\n    border-color: white;\n    -o-border-image: initial;\n       border-image: initial;\n    border-radius: 10px;\n    margin: 0 3px 0 0;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user {\n    width: 100%;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-avatar {\n    cursor: pointer;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a {\n    color: #003569;\n    text-decoration: none;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {\n    width: calc(100% - 60px);\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n@media only screen and (max-width: 820px) {\n    #BotInjectedContainer .content-wrap {\n        -ms-flex-direction: column-reverse;\n            flex-direction: column-reverse;\n        overflow: auto;\n    }\n\n    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper, #BotInjectedContainer .content-wrap .left-wrap {\n        width: 100% !important;\n        max-width: 100% !important;\n    }\n\n}\n\n.multi-actions-button {\n    text-align: center;\n    color: white;\n    background-color: #00807f;\n    font-weight: bold;\n    cursor: pointer;\n    width: 100%;\n    margin: 5px 0 15px 0;\n    border-radius: 3px;\n    padding: 8px 0;\n}\n\n.multi-actions-button.stop{\n    background: red;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper {\n    width: 380px;\n    min-width: 380px;\n    display: -ms-flexbox;\n    display: flex;\n    padding: 15px;\n    overflow-y: auto;\n    overflow-x: hidden;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .config-options {\n    padding: 8px 0px 5px 10px;\n    border: 1px dashed rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .row-info {\n    margin-bottom: 15px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: unset;\n        flex-direction: unset;\n    -ms-flex-align: center;\n        align-items: center;\n    padding-right: 13px;\n}\n\n#BotInjectedContainer .row-info.input-range {\n    padding: 15px 20px 15px 6px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"number\"] {\n    width: 50px;\n    margin: 0 5px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"checkbox\"] {\n    width: 15px;\n    height: 15px;\n\n}\n\n#BotInjectedContainer input[type=\"text\"], #BotInjectedContainer input[type=\"number\"] {\n    width: 100%;\n    min-height: 30px;\n    border: 1px solid #b5b3b3;\n    border-radius: 4px;\n    padding: 5px 10px;\n    color: #333;\n    font: normal 13px Arial;\n    background-color: #fff;\n    display: block;\n    transition: border-color 0.2s ease-out;\n}\n\n.input-range__label {\n    color: #035a33 !important;\n}\n\n.show-total-accounts{\n    display:-ms-flexbox;\n    display:flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n}\n\n.show-total-accounts span {\n    margin-right: 10px;\n}\n\n.show-total-accounts span:last-of-type {\n    margin-right: 0;\n}\n\n\n.show-total-accounts span b {\n    color:green;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow{\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n    -ms-flex-pack: justify;\n        justify-content: space-between;\n}\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{\n    width: 48%;\n}", ""]);
 
 // exports
 
@@ -22713,22 +22726,14 @@ var PopupContainer = _store2.default.connect(function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this));
 
-        _this.state = {
-            display: 'unset'
-        };
         _this.closePopup = _this.closePopup.bind(_this);
         return _this;
     }
 
     _createClass(_class, [{
-        key: 'componentWillReceiveProps',
-        value: function componentWillReceiveProps(nextProps) {
-            if (nextProps.display !== this.state.display) this.setState({ display: nextProps.display });
-        }
-    }, {
         key: 'closePopup',
         value: function closePopup() {
-            this.setState({ display: 'none' });
+            _actions2.default.showPopup(false);
         }
     }, {
         key: 'render',
@@ -22746,7 +22751,7 @@ var PopupContainer = _store2.default.connect(function (_React$Component) {
 
             return _react2.default.createElement(
                 'div',
-                { className: 'popup-container', style: { display: this.state.display } },
+                { className: 'popup-container', style: { display: this.props.showPopup ? 'unset' : 'none' } },
                 _react2.default.createElement(
                     'div',
                     { id: 'BotInjectedContainer' },
@@ -22819,7 +22824,8 @@ var PopupContainer = _store2.default.connect(function (_React$Component) {
     return {
         infoAccount: appState.infoAccount,
         dataFollow: appState.dataFollow,
-        filter: appState.filter
+        filter: appState.filter,
+        showPopup: appState.showPopup
     };
 });
 exports.default = PopupContainer;

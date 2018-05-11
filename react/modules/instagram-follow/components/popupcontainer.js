@@ -9,18 +9,11 @@ import Progress from './progress-noti'
 let PopupContainer = Store.connect(class extends React.Component {
     constructor() {
         super();
-        this.state = {
-            display: 'unset'
-        };
         this.closePopup = this.closePopup.bind(this)
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.display !== this.state.display) this.setState({display: nextProps.display})
-    }
-
     closePopup() {
-        this.setState({display: 'none'})
+        Action.showPopup(false)
     }
 
     render() {
@@ -34,7 +27,7 @@ let PopupContainer = Store.connect(class extends React.Component {
         });
 
         return (
-            <div className="popup-container" style={{display: this.state.display}}>
+            <div className="popup-container" style={{display: this.props.showPopup?'unset': 'none'}}>
                 <div id="BotInjectedContainer">
                     <div className="container-wrapper">
                         <div className="header-wrap">
@@ -64,6 +57,7 @@ let PopupContainer = Store.connect(class extends React.Component {
         infoAccount: appState.infoAccount,
         dataFollow: appState.dataFollow,
         filter: appState.filter,
+        showPopup: appState.showPopup,
     }
 })
 export default PopupContainer;
