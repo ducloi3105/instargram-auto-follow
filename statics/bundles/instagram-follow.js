@@ -22777,7 +22777,7 @@ var PopupContainer = _store2.default.connect(function (_React$Component) {
                                 _react2.default.createElement(
                                     'span',
                                     null,
-                                    'Followers: ',
+                                    'Followed: ',
                                     _react2.default.createElement(
                                         'b',
                                         null,
@@ -22787,7 +22787,7 @@ var PopupContainer = _store2.default.connect(function (_React$Component) {
                                 _react2.default.createElement(
                                     'span',
                                     null,
-                                    'Following: ',
+                                    'Follow up: ',
                                     _react2.default.createElement(
                                         'b',
                                         null,

@@ -41,8 +41,8 @@ let PopupContainer = Store.connect(class extends React.Component {
                             <h1>Automation for Instagram™</h1>
                             <div className="show-total-accounts">
                                 <span>Total: <b>{listUser.length}</b></span>
-                                <span>Followers: <b>{listUser.length - userFollowing.length}</b></span>
-                                <span>Following: <b>{userFollowing.length}</b></span>
+                                <span>Followed: <b>{listUser.length - userFollowing.length}</b></span>
+                                <span>Follow up: <b>{userFollowing.length}</b></span>
                             </div>
                             <button className="close-popup" onClick={this.closePopup}/>
                         </div>
