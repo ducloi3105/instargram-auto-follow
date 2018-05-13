@@ -1,7 +1,9 @@
 import createStore from '../../common/create-store';
 
 let state = {
-    query_hash: '37479f2b8209594dde7facb0d904896a',
+    query_hash: '37479f2b8209594dde7facb0d904896a',// followers
+    query_hash_following: '58712303d941c6855d4e888c5f0cd22f',// following
+    query_hash_which: '',
     infoAccount: {
         token: '',
         id: '',
@@ -38,9 +40,11 @@ let state = {
         listUser: [],
         total: 0
     },
-    loading_get_list_user: false,
+    loading_get_list_user_followers: false,
+    loading_get_list_user_following: false,
     loading_follow_list_user: false,
-
+    progress: 0,
+    showPopup: true
 
 };
 

@@ -3,6 +3,8 @@ import Store from '../flux/store';
 import Actions from '../flux/actions';
 import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
+import ButtonFollow from './buttonFollowAll';
+import ButtonLoadFollowers from './buttonLoadFollowers';
 
 let RightPanel = Store.connect(class RightPanel extends React.Component {
     constructor() {
@@ -10,8 +12,8 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
         this.state = {
             userId: '',
             message: '',
-        }
-        this.changeUserId = this.changeUserId.bind(this)
+        };
+        this.changeUserId = this.changeUserId.bind(this);
         this.handleLoadFollowers = this.handleLoadFollowers.bind(this)
     }
 
@@ -25,7 +27,8 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
         this.setState(state)
     }
 
-    handleLoadFollowers() {
+    handleLoadFollowers(which) {
+        if (this.props.loading_get_list_user_followers) return;
         let userId = this.state.userId;
         if (!userId) {
             this.setState({message: 'Please enter user id '});
@@ -34,7 +37,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
             return this.validUserId.focus();
         }
         Actions.setShowFollowed(true);
-
+        Actions.whichFollow(which);
         Actions.pressUserId(userId);
 
     }
@@ -45,6 +48,12 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                 <pre style={{color: 'red'}}>{this.state.message}</pre>
             </div>
         )
+    }
+
+    componentDidUpdate() {
+        if(this.checkboxFollowed){
+            this.checkboxFollowed.checked = this.props.showFollowed;
+        }
     }
 
     render() {
@@ -65,7 +74,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                                    onChange={this.changeUserId}
                                    onKeyUp={e => {
                                        if (e.keyCode === 13) {
-                                           this.handleLoadFollowers()
+                                           this.handleLoadFollowers(props.query_hash)
                                        }
                                    }}
                             />
@@ -81,11 +90,24 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
                     </div>
                 </details>
-                <div className="multi-actions-button"
-                     onClick={this.handleLoadFollowers}>Load {this.state.userId} followers
+                <div className="load-follow">
+                    <ButtonLoadFollowers
+                        loading={props.loading_get_list_user_followers && props.query_hash_which === props.query_hash}
+                        handleLoadFollowers={this.handleLoadFollowers}
+                        query_hash={props.query_hash}
+                        textStop="Stop load followers"
+                        textStart="Load followers"
+                    />
+                    <ButtonLoadFollowers
+                        loading={props.loading_get_list_user_followers && props.query_hash_which === props.query_hash_following}
+                        handleLoadFollowers={this.handleLoadFollowers}
+                        query_hash={props.query_hash_following}
+                        textStop="Stop load following"
+                        textStart="Load following"
+                    />
                 </div>
-                <details className="config-wrapper">
-                    <summary>Filter list follower</summary>
+                <details className="config-wrapper" open>
+                    <summary>Filter list users</summary>
                     <div className="config-options">
                         <div className="row-info">Filter username or user id:</div>
 
@@ -96,11 +118,17 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                         </div>
                         <div className="row-info">
                             Show user followed:
-                            <input type="checkbox" defaultChecked={props.showFollowed} onChange={(e) => {
-                                Actions.changeFilter('showFollowed', e.target.value)
-                            }}/>
+                            <input type="checkbox" defaultChecked={props.showFollowed}
+                                   ref={(el) => {
+                                       this.checkboxFollowed = el;
+                                   }}
+                                   onChange={(e) => {
+                                       Actions.changeFilter('showFollowed', e.target.value)
+                                   }}
+                            />
+
                         </div>
-                        <div className="row-info">Show follower from-to:</div>
+                        <div className="row-info">Show user from-to:</div>
                         <div className="row-info input-range">
                             <InputRange
                                 step={1}
@@ -127,9 +155,9 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                         </div>
 
                         <div className="row-info">
-                            <input type="checkbox" defaultChecked={props.is_random} onChange={(e) => {
-                                Actions.changeConfigure('is_random', e.target.value)
-                            }}/>
+                            {/*<input type="checkbox" defaultChecked={props.is_random} onChange={(e) => {*/}
+                            {/*Actions.changeConfigure('is_random', e.target.value)*/}
+                            {/*}}/>*/}
                             Randomize wait time by up to:
                             <input type="number" value={props.random_wait}
                                    onChange={(e) => {
@@ -149,16 +177,18 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
                     </div>
                 </details>
-                <div className="multi-actions-button" onClick={e=>{
-                    Actions.setShowFollowed(false);
-                    Actions.followAll()
-                }}>Follow all</div>
+                <ButtonFollow loading={this.props.loading_follow_list_user}/>
             </div>
         )
     }
 }, appState => {
     let configure = appState.configure;
     return {
+        query_hash: appState.query_hash,
+        query_hash_following: appState.query_hash_following,
+        query_hash_which: appState.query_hash_which,
+        loading_get_list_user_followers: appState.loading_get_list_user_followers,
+        loading_follow_list_user: appState.loading_follow_list_user,
         showFollowers: appState.filter.showFollowers,
         showFollowed: appState.filter.showFollowed,
         limit: appState.filter.limit,

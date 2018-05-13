@@ -53,6 +53,15 @@ body, button, input, textarea {
     z-index: 99999;
 }
 
+#show-follow-instagram-popup .popup-container .progress {
+    height: 2px;
+    transition: width .2s, opacity .4s;
+    opacity: 1;
+    z-index: 999999;
+    background-color: rgb(84, 136, 199);
+    max-width: 100%;
+}
+
 #show-follow-instagram-popup .popup-container .close-popup {
     background: 0 0;
     border: 0;
@@ -78,29 +87,13 @@ body, button, input, textarea {
 }
 
 #follow-instagram-310594 .follow-container {
-    /*width: 40px;*/
-    /*height: 40px;*/
     position: fixed;
     top: 150px;
     left: 10px;
-    /*background-image: url(../../../../statics/images/instagram_white.png);*/
-    background-image: url(/static/bundles/base/sprite_core.png/b32d382b99a8.png);
     background-repeat: no-repeat;
-    background-position: -395px -430px;
-    height: 30px;
-    width: 30px;
+    height: 50px;
+    width: 50px;
     cursor: pointer;
-}
-
-._5rnaq .follow-container {
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    display: inline-block;
-    background-size: contain;
-    margin: -12px 10px 0px 0px;
-    background-image: url(/static/bundles/base/sprite_core.png/b32d382b99a8.png);
-    top: 0;
 }
 
 #show-follow-instagram-popup #BotInjectedContainer {
@@ -162,9 +155,19 @@ body, button, input, textarea {
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
-    max-width: calc(100% - 400px);
+    max-width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    min-height: 70%;
+    max-height: 100%;
+}
+
+#show-follow-instagram-popup .popup-container .left-wrap {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 400px);
+    max-width: calc(100% - 400px);
+    min-height: 70%;
 }
 
 #BotInjectedContainer .content-wrap .list-item {
@@ -215,11 +218,11 @@ body, button, input, textarea {
 
 @media only screen and (max-width: 820px) {
     #BotInjectedContainer .content-wrap {
-        flex-direction: column;
+        flex-direction: column-reverse;
         overflow: auto;
     }
 
-    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper {
+    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper, #BotInjectedContainer .content-wrap .left-wrap {
         width: 100% !important;
         max-width: 100% !important;
     }
@@ -238,11 +241,14 @@ body, button, input, textarea {
     padding: 8px 0;
 }
 
+.multi-actions-button.stop{
+    background: red;
+}
+
 #BotInjectedContainer .content-wrap .right-panel-wrapper {
     width: 380px;
     min-width: 380px;
     display: flex;
-    min-height: 100%;
     padding: 15px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -271,6 +277,7 @@ body, button, input, textarea {
     width: 50px;
     margin: 0 5px;
 }
+
 #BotInjectedContainer .config-options .row-info input[type="checkbox"] {
     width: 15px;
     height: 15px;
@@ -292,4 +299,31 @@ body, button, input, textarea {
 
 .input-range__label {
     color: #035a33 !important;
+}
+
+.show-total-accounts{
+    display:flex;
+    flex-direction: initial;
+}
+
+.show-total-accounts span {
+    margin-right: 10px;
+}
+
+.show-total-accounts span:last-of-type {
+    margin-right: 0;
+}
+
+
+.show-total-accounts span b {
+    color:green;
+}
+
+#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow{
+    display: flex;
+    flex-direction: initial;
+    justify-content: space-between;
+}
+#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{
+    width: 48%;
 }

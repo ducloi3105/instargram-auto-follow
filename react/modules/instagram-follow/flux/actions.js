@@ -3,6 +3,7 @@ import {OAuth} from "oauthio-web";
 import API from '../API'
 import Utils from '../../common/utils'
 
+let timeoutFollowAll, intervalProgress, timeoutGetFollowers, timeoutGetFllowing;
 const Actions = {
     getInfoAccount() {
         let url = window.location.origin;
@@ -29,6 +30,7 @@ const Actions = {
         Store.setState(state => {
             state.dataFollow.listUser = [];
             state.dataFollow.total = 0;
+            state.loading_get_list_user_followers = true;
             return state;
         });
         this.getSomeone(userId)
@@ -48,18 +50,19 @@ const Actions = {
                         state.infoWho.id = info.id;
                     }
                 } catch (e) {
-                    state.infoWho.message = "Get someone id  failed";
-                    console.warn("Get someone id  failed")
+                    state.infoWho.message = "Get info account failed";
+                    alert("Get info account failed")
                 }
 
                 return state;
-            })
+            });
             this.getListFollow();
         }).catch(ex => {
-            console.warn("Get someone id  failed", ex);
+            alert("UserId incorrect");
             Store.setState(state => {
                 state.infoWho.username = '';
                 state.infoWho.id = '';
+                state.loading_get_list_user_followers = false;
                 return state;
             })
         })
@@ -68,33 +71,43 @@ const Actions = {
         let state = Store.getState();
         let pageSize = (state.filter.pageSize > state.filter.limit) ? state.filter.limit : state.filter.pageSize;
         let payload = {
-            query_hash: state.query_hash,
+            query_hash: state.query_hash_which,
             userId: state.infoWho.id,
             first: pageSize,
         };
         if (after) payload.after = after;
         API.getListFollow(payload).then(data => {
-            if (data.status == 200) {
+            if (data.status === 200) {
+                let egde_followed = state.query_hash_which === state.query_hash?data.data.data.user.edge_followed_by:data.data.data.user.edge_follow;
                 Store.setState(state => {
-                    state.dataFollow.listUser = state.dataFollow.listUser.concat(data.data.data.user.edge_followed_by.edges);
-                    state.dataFollow.total = data.data.data.user.edge_followed_by.count;
+                    state.dataFollow.listUser = state.dataFollow.listUser.concat(egde_followed.edges);
+                    state.dataFollow.total = egde_followed.count;
+                    state.filter.showFollowers.max = state.dataFollow.listUser.length-1;
+                    state.filter.showFollowers.maxStep = state.dataFollow.listUser.length;
+
                     return state;
                 });
-
-                setTimeout(() => {
+                timeoutGetFollowers = setTimeout(() => {
                     let state = Store.getState();
-                    if (data.data.data.user.edge_followed_by.page_info.has_next_page
+                    if (egde_followed.page_info.has_next_page
                         && state.dataFollow.listUser.length <= state.filter.limit
                         && state.filter.limit > state.filter.pageSize) {
-                        this.getListFollow(data.data.data.user.edge_followed_by.page_info.end_cursor);
+                        this.getListFollow(egde_followed.page_info.end_cursor);
+                    } else {
+                        Store.setState(state => {
+                            state.loading_get_list_user_followers = false;
+                            return state;
+                        });
                     }
                 }, 1000)
             }
+
         }).catch(ex => {
-            console.warn('Get list user follow failed ', ex);
+            clearTimeout(timeoutGetFollowers);
+            alert('Get list user follow failed ', ex);
             Store.setState(state => {
-                state.dataFollow.listUser = [];
                 state.dataFollow.total = 0;
+                state.loading_get_list_user_followers = false;
                 return state;
             })
 
@@ -147,9 +160,17 @@ const Actions = {
     },
 
     followAll() {
+        clearTimeout(timeoutFollowAll);
+        clearTimeout(intervalProgress);
         let userId = this.randomUserId();
-        if (!userId) return;
-
+        if (!userId) return Store.setState(state => {
+            state.loading_follow_list_user = false;
+            return state;
+        });
+        Store.setState(state => {
+            state.loading_follow_list_user = true;
+            return state;
+        });
         API.followAll(userId, Store.getState().infoAccount.token).then(data => {
             if (data.data.status === 'ok') {
                 Store.setState(state => {
@@ -162,25 +183,82 @@ const Actions = {
                     state.configure.countFollow += 1;
                     return state;
                 });
+                this.continueFollowAll()
 
-                let configure = Store.getState().configure;
-                let min = configure.wait_between_actions;
-                if (configure.countFollow % 15 === 0) { // follow 15 times => delay
-                    min = configure.wait_minus_after_sort
-                }
-                let max = min + min * (configure.random_wait / 100);
-                let timeOut = Utils.randomIntFromTo(min, max);
-                setTimeout(() => {
-                    this.followAll();
-                }, timeOut * 1000)
             }
         }).catch(ex => {
-            console.warn("Follow someone id  failed", ex);
+            alert(`Follow userid ${userId} failed`, ex);
+            clearTimeout(timeoutFollowAll);
+            clearInterval(intervalProgress);
+            this.continueFollowAll()
         })
+    },
+    continueFollowAll() {
+        let configure = Store.getState().configure;
+        let min = configure.wait_between_actions;
+        if (configure.countFollow % 15 === 0) { // follow 15 times => delay
+            min = configure.wait_minus_after_sort
+        }
+        let max = min + min * (configure.random_wait / 100);
+        let timeOut = Utils.randomIntFromTo(min, max);
+
+        let timer = timeOut / 100;
+
+        intervalProgress = setInterval(() => {
+            Store.setState(state => {
+                state.progress += 1;
+                return state;
+            })
+        }, timer * 1000);
+
+        timeoutFollowAll = setTimeout(() => {
+            Store.setState(state => {
+                state.progress = 0;
+                return state;
+            })
+            this.followAll();
+        }, timeOut * 1000)
     },
     setShowFollowed(is) {
         Store.setState(state => {
             state.filter.showFollowed = is;
+            return state;
+        })
+    },
+
+    stopFollowAll() {
+        Store.setState(state => {
+            state.loading_follow_list_user = false;
+            state.progress = 0;
+            return state;
+        });
+        clearTimeout(timeoutFollowAll);
+        clearTimeout(intervalProgress);
+    },
+
+    stopLoadFollowers(){
+        Store.setState(state => {
+            state.loading_get_list_user_followers = false;
+            return state;
+        });
+        clearTimeout(timeoutGetFollowers);
+    },
+    stopLoadFollowing(){
+        Store.setState(state => {
+            state.loading_get_list_user_followers = false;
+            return state;
+        });
+        clearTimeout(timeoutGetFollowers);
+    },
+    whichFollow(is) {
+        Store.setState(state => {
+            state.query_hash_which = is;
+            return state;
+        });
+    },
+    showPopup(is){
+        Store.setState(state => {
+            state.showPopup = is;
             return state;
         })
     }
