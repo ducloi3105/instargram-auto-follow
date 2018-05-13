@@ -35,7 +35,8 @@ let state = {
         random_wait: 25,
         wait_between_actions: 25,
         wait_minus_after_sort: 10,
-        countFollow: 0
+        countFollow: 0,
+        countUnFollow: 0,
     },
     dataFollow: {
         listUser: [],

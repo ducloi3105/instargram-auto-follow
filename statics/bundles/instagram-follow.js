@@ -667,7 +667,8 @@ var state = {
         random_wait: 25,
         wait_between_actions: 25,
         wait_minus_after_sort: 10,
-        countFollow: 0
+        countFollow: 0,
+        countUnFollow: 0
     },
     dataFollow: {
         listUser: [],
@@ -883,7 +884,7 @@ var Actions = {
     followAll: function followAll() {
         var _this4 = this;
 
-        if (_store2.default.getState().loading_unfollow_list_user) return this.logged('Please stop unfollow to continue.');
+        if (_store2.default.getState().loading_unfollow_list_user) return this.logged('Please stop unfollow before follow.');
         clearTimeout(timeoutFollowAll);
         clearTimeout(intervalProgress);
         var userId = this.randomUserId();
@@ -930,7 +931,7 @@ var Actions = {
         var min = configure.wait_between_actions;
         if (configure.countFollow % 15 === 0) {
             // follow 15 times => delay
-            min = configure.wait_minus_after_sort;
+            min = configure.wait_minus_after_sort * 60;
         }
         var max = min + min * (configure.random_wait / 100);
         var timeOut = _utils2.default.randomIntFromTo(min, max);
@@ -973,7 +974,7 @@ var Actions = {
     unfollowAll: function unfollowAll() {
         var _this6 = this;
 
-        if (_store2.default.getState().loading_follow_list_user) return this.logged('Please stop follow to continue.');
+        if (_store2.default.getState().loading_follow_list_user) return this.logged('Please stop follow before unfollow.');
         clearTimeout(timeoutUnFollowAll);
         clearTimeout(intervalProgress);
         var userId = this.randomUserIdFollowed();
@@ -1001,7 +1002,7 @@ var Actions = {
                         }
                         return item;
                     });
-                    state.configure.countFollow += 1;
+                    state.configure.countUnFollow += 1;
                     return state;
                 });
                 _this6.continueUnFollowAll();
@@ -1020,9 +1021,9 @@ var Actions = {
 
         var configure = _store2.default.getState().configure;
         var min = configure.wait_between_actions;
-        if (configure.countFollow % 15 === 0) {
+        if (configure.countUnFollow % 15 === 0) {
             // follow 15 times => delay
-            min = configure.wait_minus_after_sort;
+            min = configure.wait_minus_after_sort * 60;
         }
         var max = min + min * (configure.random_wait / 100);
         var timeOut = _utils2.default.randomIntFromTo(min, max);

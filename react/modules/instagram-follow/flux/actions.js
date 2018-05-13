@@ -171,7 +171,7 @@ const Actions = {
     },
 
     followAll() {
-        if (Store.getState().loading_unfollow_list_user) return this.logged('Please stop unfollow to continue.');
+        if (Store.getState().loading_unfollow_list_user) return this.logged('Please stop unfollow before follow.');
         clearTimeout(timeoutFollowAll);
         clearTimeout(intervalProgress);
         let userId = this.randomUserId();
@@ -216,7 +216,7 @@ const Actions = {
         let configure = Store.getState().configure;
         let min = configure.wait_between_actions;
         if (configure.countFollow % 15 === 0) { // follow 15 times => delay
-            min = configure.wait_minus_after_sort
+            min = configure.wait_minus_after_sort * 60
         }
         let max = min + min * (configure.random_wait / 100);
         let timeOut = Utils.randomIntFromTo(min, max);
@@ -260,7 +260,7 @@ const Actions = {
     },
 
     unfollowAll() {
-        if (Store.getState().loading_follow_list_user) return this.logged('Please stop follow to continue.');
+        if (Store.getState().loading_follow_list_user) return this.logged('Please stop follow before unfollow.');
         clearTimeout(timeoutUnFollowAll);
         clearTimeout(intervalProgress);
         let userId = this.randomUserIdFollowed();
@@ -288,7 +288,7 @@ const Actions = {
                         }
                         return item;
                     });
-                    state.configure.countFollow += 1;
+                    state.configure.countUnFollow += 1;
                     return state;
                 });
                 this.continueUnFollowAll()
@@ -307,8 +307,8 @@ const Actions = {
     continueUnFollowAll() {
         let configure = Store.getState().configure;
         let min = configure.wait_between_actions;
-        if (configure.countFollow % 15 === 0) { // follow 15 times => delay
-            min = configure.wait_minus_after_sort
+        if (configure.countUnFollow % 15 === 0) { // follow 15 times => delay
+            min = configure.wait_minus_after_sort * 60
         }
         let max = min + min * (configure.random_wait / 100);
         let timeOut = Utils.randomIntFromTo(min, max);
