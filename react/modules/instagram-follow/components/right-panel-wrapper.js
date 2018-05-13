@@ -4,6 +4,7 @@ import Actions from '../flux/actions';
 import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
 import ButtonFollow from './buttonFollowAll';
+import ButtonUnFollow from './buttonUnFollowAll';
 import ButtonLoadFollowers from './buttonLoadFollowers';
 import Terminal from './terminal';
 
@@ -29,7 +30,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
     }
 
     handleLoadFollowers(which) {
-        if (this.props.loading_get_list_user_followers) return;
+        if (this.props.letloading_get_list_user_follow) return;
         let userId = this.state.userId;
         if (!userId) {
             this.setState({message: 'Please enter user id '});
@@ -93,14 +94,14 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                 </details>
                 <div className="load-follow">
                     <ButtonLoadFollowers
-                        loading={props.loading_get_list_user_followers && props.query_hash_which === props.query_hash}
+                        loading={props.letloading_get_list_user_follow && props.query_hash_which === props.query_hash}
                         handleLoadFollowers={this.handleLoadFollowers}
                         query_hash={props.query_hash}
                         textStop="Stop load followers"
                         textStart="Load followers"
                     />
                     <ButtonLoadFollowers
-                        loading={props.loading_get_list_user_followers && props.query_hash_which === props.query_hash_following}
+                        loading={props.letloading_get_list_user_follow && props.query_hash_which === props.query_hash_following}
                         handleLoadFollowers={this.handleLoadFollowers}
                         query_hash={props.query_hash_following}
                         textStop="Stop load following"
@@ -178,8 +179,10 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
 
                     </div>
                 </details>
-                <ButtonFollow loading={this.props.loading_follow_list_user}/>
-
+                <div className="load-follow">
+                    <ButtonFollow loading={this.props.loading_follow_list_user}/>
+                    <ButtonUnFollow loading={this.props.loading_unfollow_list_user}/>
+                </div>
                 <details className="config-wrapper" open>
                     <summary>Logging</summary>
                     <Terminal/>
@@ -193,8 +196,9 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
         query_hash: appState.query_hash,
         query_hash_following: appState.query_hash_following,
         query_hash_which: appState.query_hash_which,
-        loading_get_list_user_followers: appState.loading_get_list_user_followers,
+        letloading_get_list_user_follow: appState.letloading_get_list_user_follow,
         loading_follow_list_user: appState.loading_follow_list_user,
+        loading_unfollow_list_user: appState.loading_unfollow_list_user,
         showFollowers: appState.filter.showFollowers,
         showFollowed: appState.filter.showFollowed,
         limit: appState.filter.limit,

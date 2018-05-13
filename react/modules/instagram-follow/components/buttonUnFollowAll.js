@@ -1,20 +1,20 @@
 import Actions from "../flux/actions";
 import React from "react";
 
-class ButtonFollow extends React.Component {
+class ButtonUnFollow extends React.Component {
     render() {
         let loading = this.props.loading;
         if (loading) return (
             <div className="multi-actions-button stop"
                  onClick={e => {
-                     Actions.logged('Stop follow all user.');
-                     Actions.stopFollowAll()
+                     Actions.logged('Stop unfollow all user.');
+                     Actions.stopUnFollowAll()
                  }}
             >
-                <span>
-                    <i className="fa fa-spinner fa-pulse fa-fw"/>
-                    Stop follow
-                </span>
+            <span>
+                <i className="fa fa-spinner fa-pulse fa-fw"/>
+                Stop unfollow
+            </span>
             </div>
         );
 
@@ -23,14 +23,14 @@ class ButtonFollow extends React.Component {
                  onClick={e => {
                      if (loading) return;
                      Actions.setShowFollowed(false);
-                     Actions.logged('Start follow all user.');
-                     Actions.followAll()
+                     Actions.logged('Start unfollow all user.');
+                     Actions.unfollowAll()
                  }}
             >
-                <span>Follow all</span>
+                <span>UnFollow all</span>
             </div>
         )
     }
 }
 
-export default ButtonFollow;
+export default ButtonUnFollow;

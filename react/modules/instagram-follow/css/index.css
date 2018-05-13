@@ -338,4 +338,6 @@ body, button, input, textarea {
     font-family: monospace;
     word-wrap: break-word;
     border-radius: 2%;
+    overflow-x: hidden;
+    overflow-y: auto;
 }

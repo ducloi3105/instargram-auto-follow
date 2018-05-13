@@ -26,6 +26,15 @@ export default {
             }
         })
     },
+    unfollowAll(userId, token) {
+        return axios.post(`https://www.instagram.com/web/friendships/${userId}/unfollow/`, null, {
+            headers: {
+                "x-csrftoken": token,
+                "x-instagram-ajax": 1,
+                "x-requested-with": "XMLHttpRequest"
+            }
+        })
+    },
 
     getMoreDataUser(url) {
         return axios.get(url)
