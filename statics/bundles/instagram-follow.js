@@ -639,6 +639,7 @@ var state = {
     infoAccount: {
         token: '',
         id: '',
+        username: '',
         message: '',
         status: ''
     },
@@ -676,7 +677,8 @@ var state = {
     loading_get_list_user_following: false,
     loading_follow_list_user: false,
     progress: 0,
-    showPopup: true
+    showPopup: true,
+    logged: []
 
 };
 
@@ -808,27 +810,35 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var timeoutFollowAll = void 0,
     intervalProgress = void 0,
-    timeoutGetFollowers = void 0,
-    timeoutGetFllowing = void 0;
+    timeoutGetFollowers = void 0;
 var Actions = {
+    logged: function logged(newLog) {
+        _store2.default.setState(function (state) {
+            state.logged.push(newLog);
+            return state;
+        });
+    },
     getInfoAccount: function getInfoAccount() {
+        var _this = this;
+
         var url = window.location.origin;
         _API2.default.getUserIdFromUrl(url).then(function (data) {
+            _this.logged("Login success");
             _store2.default.setState(function (state) {
                 try {
                     data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
 
                     state.infoAccount.token = data.config.csrf_token;
                     state.infoAccount.id = data.config.viewer.id;
+                    state.infoAccount.username = data.config.viewer.username;
                 } catch (e) {
-                    state.infoAccount.message = "Get info account (token, id)  failed";
-                    console.warn("Get info account (token, id)  failed");
+                    _this.logged("Get info account (token, id)  failed");
                 }
 
                 return state;
             });
         }).catch(function (ex) {
-            console.warn("Get info account (token, id)  failed", ex);
+            _this.logged("404 not found");
         });
     },
     pressUserId: function pressUserId(userId) {
@@ -841,12 +851,13 @@ var Actions = {
         this.getSomeone(userId);
     },
     getSomeone: function getSomeone(username) {
-        var _this = this;
+        var _this2 = this;
 
         if (!username) return console.warn('Typing username or redirect link to user.');
         var url = window.location.origin;
         url += '/' + username;
         _API2.default.getUserIdFromUrl(url).then(function (data) {
+            _this2.logged('Get info ' + username + ' success');
             _store2.default.setState(function (state) {
                 try {
                     data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
@@ -857,15 +868,15 @@ var Actions = {
                         state.infoWho.id = info.id;
                     }
                 } catch (e) {
-                    state.infoWho.message = "Get info account failed";
-                    alert("Get info account failed");
+                    _this2.logged('Get info ' + username + ' failed');
                 }
 
                 return state;
             });
-            _this.getListFollow();
+            _this2.logged('Start get list follow from ' + username);
+            _this2.getListFollow();
         }).catch(function (ex) {
-            alert("UserId incorrect");
+            _this2.logged(username + ' incorrect');
             _store2.default.setState(function (state) {
                 state.infoWho.username = '';
                 state.infoWho.id = '';
@@ -875,7 +886,7 @@ var Actions = {
         });
     },
     getListFollow: function getListFollow(after) {
-        var _this2 = this;
+        var _this3 = this;
 
         var state = _store2.default.getState();
         var pageSize = state.filter.pageSize > state.filter.limit ? state.filter.limit : state.filter.pageSize;
@@ -888,19 +899,21 @@ var Actions = {
         _API2.default.getListFollow(payload).then(function (data) {
             if (data.status === 200) {
                 var egde_followed = state.query_hash_which === state.query_hash ? data.data.data.user.edge_followed_by : data.data.data.user.edge_follow;
+                _this3.logged('Get list user success');
                 _store2.default.setState(function (state) {
                     state.dataFollow.listUser = state.dataFollow.listUser.concat(egde_followed.edges);
                     state.dataFollow.total = egde_followed.count;
                     state.filter.showFollowers.max = state.dataFollow.listUser.length - 1;
                     state.filter.showFollowers.maxStep = state.dataFollow.listUser.length;
-
                     return state;
                 });
                 timeoutGetFollowers = setTimeout(function () {
                     var state = _store2.default.getState();
                     if (egde_followed.page_info.has_next_page && state.dataFollow.listUser.length <= state.filter.limit && state.filter.limit > state.filter.pageSize) {
-                        _this2.getListFollow(egde_followed.page_info.end_cursor);
+                        _this3.logged('Continue get list user');
+                        _this3.getListFollow(egde_followed.page_info.end_cursor);
                     } else {
+                        _this3.logged('Stop get list user');
                         _store2.default.setState(function (state) {
                             state.loading_get_list_user_followers = false;
                             return state;
@@ -910,7 +923,7 @@ var Actions = {
             }
         }).catch(function (ex) {
             clearTimeout(timeoutGetFollowers);
-            alert('Get list user follow failed ', ex);
+            _this3.logged('Stop get list user');
             _store2.default.setState(function (state) {
                 state.dataFollow.total = 0;
                 state.loading_get_list_user_followers = false;
@@ -958,26 +971,32 @@ var Actions = {
         if (_listUser.length === 0) return null;
         if (_listUser.length === 1) return _listUser[0].node.id;
         var index = _utils2.default.randomIntFromTo(0, _listUser.length - 1);
-        console.log('===', index, _listUser);
-
-        if (index <= _listUser.length) return _listUser[index].node.id;else this.randomUserId();
+        if (index <= _listUser.length) {
+            this.logged('Follow ' + _listUser[index].node.username);
+            return _listUser[index].node.id;
+        } else this.randomUserId();
     },
     followAll: function followAll() {
-        var _this3 = this;
+        var _this4 = this;
 
         clearTimeout(timeoutFollowAll);
         clearTimeout(intervalProgress);
         var userId = this.randomUserId();
-        if (!userId) return _store2.default.setState(function (state) {
-            state.loading_follow_list_user = false;
-            return state;
-        });
+        if (!userId) {
+            this.logged('Stop follow all user');
+            return _store2.default.setState(function (state) {
+                state.loading_follow_list_user = false;
+                return state;
+            });
+        }
+
         _store2.default.setState(function (state) {
             state.loading_follow_list_user = true;
             return state;
         });
         _API2.default.followAll(userId, _store2.default.getState().infoAccount.token).then(function (data) {
             if (data.data.status === 'ok') {
+                _this4.logged('Follow success');
                 _store2.default.setState(function (state) {
                     state.dataFollow.listUser.map(function (item, index) {
                         if (item.node.id === userId) {
@@ -988,17 +1007,19 @@ var Actions = {
                     state.configure.countFollow += 1;
                     return state;
                 });
-                _this3.continueFollowAll();
+                _this4.continueFollowAll();
+            } else {
+                _this4.logged('Follow userid ' + userId + ' failed');
             }
         }).catch(function (ex) {
-            alert('Follow userid ' + userId + ' failed', ex);
+            _this4.logged('Follow userid ' + userId + ' failed');
             clearTimeout(timeoutFollowAll);
             clearInterval(intervalProgress);
-            _this3.continueFollowAll();
+            _this4.continueFollowAll();
         });
     },
     continueFollowAll: function continueFollowAll() {
-        var _this4 = this;
+        var _this5 = this;
 
         var configure = _store2.default.getState().configure;
         var min = configure.wait_between_actions;
@@ -1010,6 +1031,7 @@ var Actions = {
         var timeOut = _utils2.default.randomIntFromTo(min, max);
 
         var timer = timeOut / 100;
+        this.logged('Please wait ' + timeOut * 1000 + ' second to continue');
 
         intervalProgress = setInterval(function () {
             _store2.default.setState(function (state) {
@@ -1023,9 +1045,11 @@ var Actions = {
                 state.progress = 0;
                 return state;
             });
-            _this4.followAll();
+            _this5.followAll();
         }, timeOut * 1000);
     },
+    unfollowAll: function unfollowAll() {},
+    continueUnfollowAll: function continueUnfollowAll() {},
     setShowFollowed: function setShowFollowed(is) {
         _store2.default.setState(function (state) {
             state.filter.showFollowed = is;
@@ -2671,7 +2695,9 @@ var App = _store2.default.connect(function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var infoAcc = this.props.infoAccount;
 
+            if (!infoAcc.token || !infoAcc.id) return null;
             return _react2.default.createElement('div', { className: 'follow-container', onClick: this.showPopup, title: 'Automation for Instagram\u2122',
                 style: { backgroundImage: 'url(' + chrome.extension.getURL('display_image.png') + ')' }
             });
@@ -2682,7 +2708,8 @@ var App = _store2.default.connect(function (_React$Component) {
 }(_react2.default.Component), function (appState) {
     return {
         loginTo: appState.loginTo,
-        publicKey: appState.publicKey
+        publicKey: appState.publicKey,
+        infoAccount: appState.infoAccount
     };
 });
 
@@ -22569,7 +22596,7 @@ exports = module.exports = __webpack_require__(27)(false);
 
 
 // module
-exports.push([module.i, "#follow-instagram-310594, article, div, footer, header, main, nav, section {\n    -ms-flex-align: stretch;\n    align-items: stretch;\n    border: 0 solid #000;\n    box-sizing: border-box;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n    flex-direction: column;\n    -ms-flex-negative: 0;\n    flex-shrink: 0;\n    margin: 0;\n    padding: 0;\n    position: relative;\n}\n\na, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {\n    margin: 0;\n    padding: 0;\n    border: 0;\n    font: inherit;\n    vertical-align: baseline;\n}\n\nbody, button, input, textarea {\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    font-size: 14px;\n    line-height: 18px;\n}\n\n#show-follow-instagram-popup .popup-container {\n    background-color: rgba(0, 0, 0, .5);\n    bottom: 0;\n    -ms-flex-pack: justify;\n    justify-content: space-between;\n    left: 0;\n    overflow-y: auto;\n    -webkit-overflow-scrolling: touch;\n    position: fixed;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n}\n\n#show-follow-instagram-popup .popup-container .progress {\n    height: 2px;\n    transition: width .2s, opacity .4s;\n    opacity: 1;\n    z-index: 999999;\n    background-color: rgb(84, 136, 199);\n    max-width: 100%;\n}\n\n#show-follow-instagram-popup .popup-container .close-popup {\n    background: 0 0;\n    border: 0;\n    cursor: pointer;\n    height: 36px;\n    outline: 0;\n    overflow: hidden;\n    position: absolute;\n    right: -10px;\n    top: -15px;\n    z-index: 100000;\n}\n\n#show-follow-instagram-popup .popup-container .close-popup::before {\n    color: black;\n    content: '\\D7';\n    display: block;\n    font-size: 36px;\n    font-weight: 600;\n    line-height: 36px;\n    padding: 0;\n    margin: 0;\n}\n\n#follow-instagram-310594 .follow-container {\n    position: fixed;\n    top: 150px;\n    left: 10px;\n    background-repeat: no-repeat;\n    height: 50px;\n    width: 50px;\n    cursor: pointer;\n}\n\n#show-follow-instagram-popup #BotInjectedContainer {\n    display: -ms-flexbox;\n    display: flex;\n    vertical-align: baseline;\n    background-color: rgb(254, 254, 254);\n    position: fixed;\n    width: 98%;\n    top: 3%;\n    left: 1%;\n    z-index: 9999;\n    height: 94%;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    -ms-flex-align: start;\n        align-items: flex-start;\n    -ms-flex-line-pack: start;\n        align-content: flex-start;\n    resize: both;\n    margin: 0px;\n    font: inherit;\n    border-width: 1px;\n    border-style: solid;\n    border-color: rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    padding: 1%;\n}\n\n#BotInjectedContainer .container-wrapper {\n    height: 100%;\n    width: 100%;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    /*overflow-x: auto;*/\n    /*overflow-y: hidden;*/\n\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap {\n    height: 50px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n}\n\n#BotInjectedContainer .container-wrapper .header-wrap h1 {\n    font-size: 28px;\n    line-height: 28px;\n    font-weight: bold;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .content-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-positive: 1;\n        flex-grow: 1;\n    height: calc(100% - 77px);\n    -ms-flex-direction: row;\n        flex-direction: row;\n}\n\n#BotInjectedContainer .content-wrap .left-panel-wrapper {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: wrap;\n        flex-wrap: wrap;\n    width: 100%;\n    max-width: 100%;\n    overflow-y: auto;\n    overflow-x: hidden;\n    min-height: 70%;\n    max-height: 100%;\n}\n\n#show-follow-instagram-popup .popup-container .left-wrap {\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: column;\n        flex-direction: column;\n    width: calc(100% - 400px);\n    max-width: calc(100% - 400px);\n    min-height: 70%;\n}\n\n#BotInjectedContainer .content-wrap .list-item {\n    width: 245px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: row;\n        flex-direction: row;\n    -ms-flex-wrap: nowrap;\n        flex-wrap: nowrap;\n    -ms-flex-align: center;\n        align-items: center;\n    margin: 0 10px 10px 0;\n    height: 66px;\n}\n\n#BotInjectedContainer .content-wrap .list-item.selected-item {\n    border: 2px solid red;\n    border-radius: 5%;\n}\n\n#BotInjectedContainer .content-wrap .list-item img.avatar {\n    width: 50px;\n    height: 50px;\n    border-width: 4px;\n    border-style: solid;\n    border-color: white;\n    -o-border-image: initial;\n       border-image: initial;\n    border-radius: 10px;\n    margin: 0 3px 0 0;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user {\n    width: 100%;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-avatar {\n    cursor: pointer;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a {\n    color: #003569;\n    text-decoration: none;\n}\n\n#BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {\n    width: calc(100% - 60px);\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n@media only screen and (max-width: 820px) {\n    #BotInjectedContainer .content-wrap {\n        -ms-flex-direction: column-reverse;\n            flex-direction: column-reverse;\n        overflow: auto;\n    }\n\n    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper, #BotInjectedContainer .content-wrap .left-wrap {\n        width: 100% !important;\n        max-width: 100% !important;\n    }\n\n}\n\n.multi-actions-button {\n    text-align: center;\n    color: white;\n    background-color: #00807f;\n    font-weight: bold;\n    cursor: pointer;\n    width: 100%;\n    margin: 5px 0 15px 0;\n    border-radius: 3px;\n    padding: 8px 0;\n}\n\n.multi-actions-button.stop{\n    background: red;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper {\n    width: 380px;\n    min-width: 380px;\n    display: -ms-flexbox;\n    display: flex;\n    padding: 15px;\n    overflow-y: auto;\n    overflow-x: hidden;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .config-options {\n    padding: 8px 0px 5px 10px;\n    border: 1px dashed rgb(204, 204, 204);\n    -o-border-image: initial;\n       border-image: initial;\n    margin: 0 0 10px;\n}\n\n#BotInjectedContainer .row-info {\n    margin-bottom: 15px;\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: unset;\n        flex-direction: unset;\n    -ms-flex-align: center;\n        align-items: center;\n    padding-right: 13px;\n}\n\n#BotInjectedContainer .row-info.input-range {\n    padding: 15px 20px 15px 6px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"number\"] {\n    width: 50px;\n    margin: 0 5px;\n}\n\n#BotInjectedContainer .config-options .row-info input[type=\"checkbox\"] {\n    width: 15px;\n    height: 15px;\n\n}\n\n#BotInjectedContainer input[type=\"text\"], #BotInjectedContainer input[type=\"number\"] {\n    width: 100%;\n    min-height: 30px;\n    border: 1px solid #b5b3b3;\n    border-radius: 4px;\n    padding: 5px 10px;\n    color: #333;\n    font: normal 13px Arial;\n    background-color: #fff;\n    display: block;\n    transition: border-color 0.2s ease-out;\n}\n\n.input-range__label {\n    color: #035a33 !important;\n}\n\n.show-total-accounts{\n    display:-ms-flexbox;\n    display:flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n}\n\n.show-total-accounts span {\n    margin-right: 10px;\n}\n\n.show-total-accounts span:last-of-type {\n    margin-right: 0;\n}\n\n\n.show-total-accounts span b {\n    color:green;\n}\n\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow{\n    display: -ms-flexbox;\n    display: flex;\n    -ms-flex-direction: initial;\n        flex-direction: initial;\n    -ms-flex-pack: justify;\n        justify-content: space-between;\n}\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{\n    width: 48%;\n}", ""]);
+exports.push([module.i, "#follow-instagram-310594, article, div, footer, header, main, nav, section {\r\n    -ms-flex-align: stretch;\r\n    align-items: stretch;\r\n    border: 0 solid #000;\r\n    box-sizing: border-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-direction: column;\r\n    flex-direction: column;\r\n    -ms-flex-negative: 0;\r\n    flex-shrink: 0;\r\n    margin: 0;\r\n    padding: 0;\r\n    position: relative;\r\n}\r\n\r\na, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {\r\n    margin: 0;\r\n    padding: 0;\r\n    border: 0;\r\n    font: inherit;\r\n    vertical-align: baseline;\r\n}\r\n\r\nbody, button, input, textarea {\r\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\r\n    font-size: 14px;\r\n    line-height: 18px;\r\n}\r\n\r\n#show-follow-instagram-popup .popup-container {\r\n    background-color: rgba(0, 0, 0, .5);\r\n    bottom: 0;\r\n    -ms-flex-pack: justify;\r\n    justify-content: space-between;\r\n    left: 0;\r\n    overflow-y: auto;\r\n    -webkit-overflow-scrolling: touch;\r\n    position: fixed;\r\n    right: 0;\r\n    top: 0;\r\n    z-index: 99999;\r\n}\r\n\r\n#show-follow-instagram-popup .popup-container .progress {\r\n    height: 2px;\r\n    transition: width .2s, opacity .4s;\r\n    opacity: 1;\r\n    z-index: 999999;\r\n    background-color: rgb(84, 136, 199);\r\n    max-width: 100%;\r\n}\r\n\r\n#show-follow-instagram-popup .popup-container .close-popup {\r\n    background: 0 0;\r\n    border: 0;\r\n    cursor: pointer;\r\n    height: 36px;\r\n    outline: 0;\r\n    overflow: hidden;\r\n    position: absolute;\r\n    right: -10px;\r\n    top: -15px;\r\n    z-index: 100000;\r\n}\r\n\r\n#show-follow-instagram-popup .popup-container .close-popup::before {\r\n    color: black;\r\n    content: '\\D7';\r\n    display: block;\r\n    font-size: 36px;\r\n    font-weight: 600;\r\n    line-height: 36px;\r\n    padding: 0;\r\n    margin: 0;\r\n}\r\n\r\n#follow-instagram-310594 .follow-container {\r\n    position: fixed;\r\n    top: 150px;\r\n    left: 10px;\r\n    background-repeat: no-repeat;\r\n    height: 50px;\r\n    width: 50px;\r\n    cursor: pointer;\r\n}\r\n\r\n#show-follow-instagram-popup #BotInjectedContainer {\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    vertical-align: baseline;\r\n    background-color: rgb(254, 254, 254);\r\n    position: fixed;\r\n    width: 98%;\r\n    top: 3%;\r\n    left: 1%;\r\n    z-index: 9999;\r\n    height: 94%;\r\n    -ms-flex-direction: row;\r\n        flex-direction: row;\r\n    -ms-flex-wrap: wrap;\r\n        flex-wrap: wrap;\r\n    -ms-flex-align: start;\r\n        align-items: flex-start;\r\n    -ms-flex-line-pack: start;\r\n        align-content: flex-start;\r\n    resize: both;\r\n    margin: 0px;\r\n    font: inherit;\r\n    border-width: 1px;\r\n    border-style: solid;\r\n    border-color: rgb(204, 204, 204);\r\n    -o-border-image: initial;\r\n       border-image: initial;\r\n    padding: 1%;\r\n}\r\n\r\n#BotInjectedContainer .container-wrapper {\r\n    height: 100%;\r\n    width: 100%;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-positive: 1;\r\n        flex-grow: 1;\r\n    /*overflow-x: auto;*/\r\n    /*overflow-y: hidden;*/\r\n\r\n}\r\n\r\n#BotInjectedContainer .container-wrapper .header-wrap {\r\n    height: 50px;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-positive: 1;\r\n        flex-grow: 1;\r\n}\r\n\r\n#BotInjectedContainer .container-wrapper .header-wrap h1 {\r\n    font-size: 28px;\r\n    line-height: 28px;\r\n    font-weight: bold;\r\n    margin: 0 0 10px;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap {\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-positive: 1;\r\n        flex-grow: 1;\r\n    height: calc(100% - 77px);\r\n    -ms-flex-direction: row;\r\n        flex-direction: row;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .left-panel-wrapper {\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-direction: row;\r\n        flex-direction: row;\r\n    -ms-flex-wrap: wrap;\r\n        flex-wrap: wrap;\r\n    width: 100%;\r\n    max-width: 100%;\r\n    overflow-y: auto;\r\n    overflow-x: hidden;\r\n    min-height: 70%;\r\n    max-height: 100%;\r\n}\r\n\r\n#show-follow-instagram-popup .popup-container .left-wrap {\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-direction: column;\r\n        flex-direction: column;\r\n    width: calc(100% - 400px);\r\n    max-width: calc(100% - 400px);\r\n    min-height: 70%;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .list-item {\r\n    width: 245px;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-direction: row;\r\n        flex-direction: row;\r\n    -ms-flex-wrap: nowrap;\r\n        flex-wrap: nowrap;\r\n    -ms-flex-align: center;\r\n        align-items: center;\r\n    margin: 0 10px 10px 0;\r\n    height: 66px;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .list-item.selected-item {\r\n    border: 2px solid red;\r\n    border-radius: 5%;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .list-item img.avatar {\r\n    width: 50px;\r\n    height: 50px;\r\n    border-width: 4px;\r\n    border-style: solid;\r\n    border-color: white;\r\n    -o-border-image: initial;\r\n       border-image: initial;\r\n    border-radius: 10px;\r\n    margin: 0 3px 0 0;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .list-item .info-user {\r\n    width: 100%;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .list-item .info-avatar {\r\n    cursor: pointer;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .list-item .info-user a {\r\n    color: #003569;\r\n    text-decoration: none;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .list-item .info-user a, #BotInjectedContainer .content-wrap .list-item .info-user span {\r\n    width: calc(100% - 60px);\r\n    overflow: hidden;\r\n    text-overflow: ellipsis;\r\n    white-space: nowrap;\r\n}\r\n\r\n@media only screen and (max-width: 820px) {\r\n    #BotInjectedContainer .content-wrap {\r\n        -ms-flex-direction: column-reverse;\r\n            flex-direction: column-reverse;\r\n        overflow: auto;\r\n    }\r\n\r\n    #BotInjectedContainer .content-wrap .right-panel-wrapper, #BotInjectedContainer .content-wrap .left-panel-wrapper, #BotInjectedContainer .content-wrap .left-wrap {\r\n        width: 100% !important;\r\n        max-width: 100% !important;\r\n    }\r\n\r\n}\r\n\r\n.multi-actions-button {\r\n    text-align: center;\r\n    color: white;\r\n    background-color: #00807f;\r\n    font-weight: bold;\r\n    cursor: pointer;\r\n    width: 100%;\r\n    margin: 5px 0 15px 0;\r\n    border-radius: 3px;\r\n    padding: 8px 0;\r\n}\r\n\r\n.multi-actions-button.stop{\r\n    background: red;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .right-panel-wrapper {\r\n    width: 380px;\r\n    min-width: 380px;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    padding: 15px;\r\n    overflow-y: auto;\r\n    overflow-x: hidden;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .right-panel-wrapper .config-options {\r\n    padding: 8px 0px 5px 10px;\r\n    border: 1px dashed rgb(204, 204, 204);\r\n    -o-border-image: initial;\r\n       border-image: initial;\r\n    margin: 0 0 10px;\r\n}\r\n\r\n#BotInjectedContainer .row-info {\r\n    margin-bottom: 15px;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-direction: unset;\r\n        flex-direction: unset;\r\n    -ms-flex-align: center;\r\n        align-items: center;\r\n    padding-right: 13px;\r\n}\r\n\r\n#BotInjectedContainer .row-info.input-range {\r\n    padding: 15px 20px 15px 6px;\r\n}\r\n\r\n#BotInjectedContainer .config-options .row-info input[type=\"number\"] {\r\n    width: 50px;\r\n    margin: 0 5px;\r\n}\r\n\r\n#BotInjectedContainer .config-options .row-info input[type=\"checkbox\"] {\r\n    width: 15px;\r\n    height: 15px;\r\n\r\n}\r\n\r\n#BotInjectedContainer input[type=\"text\"], #BotInjectedContainer input[type=\"number\"] {\r\n    width: 100%;\r\n    min-height: 30px;\r\n    border: 1px solid #b5b3b3;\r\n    border-radius: 4px;\r\n    padding: 5px 10px;\r\n    color: #333;\r\n    font: normal 13px Arial;\r\n    background-color: #fff;\r\n    display: block;\r\n    transition: border-color 0.2s ease-out;\r\n}\r\n\r\n.input-range__label {\r\n    color: #035a33 !important;\r\n}\r\n\r\n.show-total-accounts{\r\n    display:-ms-flexbox;\r\n    display:flex;\r\n    -ms-flex-direction: initial;\r\n        flex-direction: initial;\r\n}\r\n\r\n.show-total-accounts span {\r\n    margin-right: 10px;\r\n}\r\n\r\n.show-total-accounts span:last-of-type {\r\n    margin-right: 0;\r\n}\r\n\r\n\r\n.show-total-accounts span b {\r\n    color:green;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow{\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -ms-flex-direction: initial;\r\n        flex-direction: initial;\r\n    -ms-flex-pack: justify;\r\n        justify-content: space-between;\r\n}\r\n#BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{\r\n    width: 48%;\r\n}\r\n\r\n#BotInjectedContainer .content-wrap .right-panel-wrapper .config-wrapper .ter-back{\r\n    background: black;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    height: 300px;\r\n    color: #02bd02;\r\n    padding: 8px;\r\n    font-size: 1em;\r\n    font-family: monospace;\r\n    word-wrap: break-word;\r\n    border-radius: 2%;\r\n}", ""]);
 
 // exports
 
@@ -22987,6 +23014,10 @@ var _buttonLoadFollowers = __webpack_require__(92);
 
 var _buttonLoadFollowers2 = _interopRequireDefault(_buttonLoadFollowers);
 
+var _terminal = __webpack_require__(94);
+
+var _terminal2 = _interopRequireDefault(_terminal);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23230,7 +23261,17 @@ var RightPanel = _store2.default.connect(function (_React$Component) {
                         )
                     )
                 ),
-                _react2.default.createElement(_buttonFollowAll2.default, { loading: this.props.loading_follow_list_user })
+                _react2.default.createElement(_buttonFollowAll2.default, { loading: this.props.loading_follow_list_user }),
+                _react2.default.createElement(
+                    'details',
+                    { className: 'config-wrapper', open: true },
+                    _react2.default.createElement(
+                        'summary',
+                        null,
+                        'Logging'
+                    ),
+                    _react2.default.createElement(_terminal2.default, null)
+                )
             );
         }
     }]);
@@ -26110,6 +26151,7 @@ var ButtonFollow = function (_React$Component) {
                 "div",
                 { className: "multi-actions-button stop",
                     onClick: function onClick(e) {
+                        _actions2.default.logged('Stop follow all user');
                         _actions2.default.stopFollowAll();
                     }
                 },
@@ -26127,6 +26169,7 @@ var ButtonFollow = function (_React$Component) {
                     onClick: function onClick(e) {
                         if (loading) return;
                         _actions2.default.setShowFollowed(false);
+                        _actions2.default.logged('Start follow all user');
                         _actions2.default.followAll();
                     }
                 },
@@ -26192,6 +26235,7 @@ var ButtonFollow = function (_React$Component) {
                 "div",
                 { className: "multi-actions-button stop",
                     onClick: function onClick(e) {
+                        _actions2.default.logged(_this2.props.textStop);
                         _actions2.default.stopLoadFollowers();
                     }
                 },
@@ -26206,6 +26250,7 @@ var ButtonFollow = function (_React$Component) {
             return _react2.default.createElement(
                 "div",
                 { className: "multi-actions-button", onClick: function onClick() {
+                        _actions2.default.logged(_this2.props.textStart);
                         _this2.props.handleLoadFollowers(_this2.props.query_hash);
                     } },
                 _react2.default.createElement(
@@ -26278,6 +26323,80 @@ var Progress = _store2.default.connect(function (_React$Component) {
 });
 
 exports.default = Progress;
+
+/***/ }),
+/* 94 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _store = __webpack_require__(5);
+
+var _store2 = _interopRequireDefault(_store);
+
+__webpack_require__(89);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Terminal = _store2.default.connect(function (_React$Component) {
+    _inherits(_class, _React$Component);
+
+    function _class() {
+        _classCallCheck(this, _class);
+
+        return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+    }
+
+    _createClass(_class, [{
+        key: 'render',
+        value: function render() {
+            var infoAccount = this.props.infoAccount;
+            return _react2.default.createElement(
+                'div',
+                { className: 'ter-back' },
+                this.props.logged.map(function (item, index) {
+                    var username = infoAccount.username ? infoAccount.username : 'Logged';
+                    return _react2.default.createElement(
+                        'p',
+                        { key: index, className: 'ter-log' },
+                        _react2.default.createElement(
+                            'b',
+                            null,
+                            username
+                        ),
+                        ':~$ ',
+                        item
+                    );
+                })
+            );
+        }
+    }]);
+
+    return _class;
+}(_react2.default.Component), function (appState) {
+    return {
+        logged: appState.logged,
+        infoAccount: appState.infoAccount
+    };
+});
+exports.default = Terminal;
 
 /***/ })
 ],[30]);

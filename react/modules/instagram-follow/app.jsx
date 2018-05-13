@@ -40,17 +40,20 @@ const App = Store.connect(class App extends React.Component {
     }
 
     render() {
+        let infoAcc = this.props.infoAccount;
 
+        if (!infoAcc.token || !infoAcc.id) return null;
         return (
-            <div className="follow-container" onClick={this.showPopup} title="Automation for Instagram™" 
-                 style={{backgroundImage:`url(${chrome.extension.getURL('display_image.png')})`}}
+            <div className="follow-container" onClick={this.showPopup} title="Automation for Instagram™"
+                 style={{backgroundImage: `url(${chrome.extension.getURL('display_image.png')})`}}
             />
         )
     }
 }, appState => {
     return {
         loginTo: appState.loginTo,
-        publicKey: appState.publicKey
+        publicKey: appState.publicKey,
+        infoAccount: appState.infoAccount
     }
 });
 

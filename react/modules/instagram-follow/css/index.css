@@ -327,3 +327,15 @@ body, button, input, textarea {
 #BotInjectedContainer .content-wrap .right-panel-wrapper .load-follow .multi-actions-button{
     width: 48%;
 }
+
+#BotInjectedContainer .content-wrap .right-panel-wrapper .config-wrapper .ter-back{
+    background: black;
+    display: flex;
+    height: 300px;
+    color: #02bd02;
+    padding: 8px;
+    font-size: 1em;
+    font-family: monospace;
+    word-wrap: break-word;
+    border-radius: 2%;
+}

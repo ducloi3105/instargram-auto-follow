@@ -8,6 +8,7 @@ class ButtonFollow extends React.Component {
         if (loading) return (
             <div className="multi-actions-button stop"
                  onClick={e => {
+                     Actions.logged(this.props.textStop);
                      Actions.stopLoadFollowers();
                  }}
             >
@@ -20,6 +21,7 @@ class ButtonFollow extends React.Component {
 
         return (
             <div className="multi-actions-button" onClick={() => {
+                Actions.logged(this.props.textStart);
                 this.props.handleLoadFollowers(this.props.query_hash)
             }}>
                 <span>{this.props.textStart}</span>

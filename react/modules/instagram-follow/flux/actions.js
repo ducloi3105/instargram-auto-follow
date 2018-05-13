@@ -3,11 +3,18 @@ import {OAuth} from "oauthio-web";
 import API from '../API'
 import Utils from '../../common/utils'
 
-let timeoutFollowAll, intervalProgress, timeoutGetFollowers, timeoutGetFllowing;
+let timeoutFollowAll, intervalProgress, timeoutGetFollowers;
 const Actions = {
+    logged(newLog) {
+        Store.setState(state => {
+            state.logged.push(newLog);
+            return state;
+        })
+    },
     getInfoAccount() {
         let url = window.location.origin;
         API.getUserIdFromUrl(url).then(data => {
+            this.logged("Login success");
             Store.setState(state => {
                 try {
                     data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
@@ -15,15 +22,15 @@ const Actions = {
 
                     state.infoAccount.token = data.config.csrf_token;
                     state.infoAccount.id = data.config.viewer.id;
+                    state.infoAccount.username = data.config.viewer.username;
                 } catch (e) {
-                    state.infoAccount.message = "Get info account (token, id)  failed";
-                    console.warn("Get info account (token, id)  failed")
+                    this.logged("Get info account (token, id)  failed")
                 }
 
                 return state;
             })
         }).catch(ex => {
-            console.warn("Get info account (token, id)  failed", ex)
+            this.logged("404 not found")
         })
     },
     pressUserId(userId) {
@@ -40,6 +47,7 @@ const Actions = {
         let url = window.location.origin;
         url += '/' + username;
         API.getUserIdFromUrl(url).then(data => {
+            this.logged(`Get info ${username} success`);
             Store.setState(state => {
                 try {
                     data = JSON.parse(data.data.split("window._sharedData = ")[1].split(";</script>")[0]);
@@ -50,15 +58,15 @@ const Actions = {
                         state.infoWho.id = info.id;
                     }
                 } catch (e) {
-                    state.infoWho.message = "Get info account failed";
-                    alert("Get info account failed")
+                    this.logged(`Get info ${username} failed`)
                 }
 
                 return state;
             });
+            this.logged(`Start get list follow from ${username}`);
             this.getListFollow();
         }).catch(ex => {
-            alert("UserId incorrect");
+            this.logged(`${username} incorrect`);
             Store.setState(state => {
                 state.infoWho.username = '';
                 state.infoWho.id = '';
@@ -78,13 +86,13 @@ const Actions = {
         if (after) payload.after = after;
         API.getListFollow(payload).then(data => {
             if (data.status === 200) {
-                let egde_followed = state.query_hash_which === state.query_hash?data.data.data.user.edge_followed_by:data.data.data.user.edge_follow;
+                let egde_followed = state.query_hash_which === state.query_hash ? data.data.data.user.edge_followed_by : data.data.data.user.edge_follow;
+                this.logged(`Get list user success`);
                 Store.setState(state => {
                     state.dataFollow.listUser = state.dataFollow.listUser.concat(egde_followed.edges);
                     state.dataFollow.total = egde_followed.count;
-                    state.filter.showFollowers.max = state.dataFollow.listUser.length-1;
+                    state.filter.showFollowers.max = state.dataFollow.listUser.length - 1;
                     state.filter.showFollowers.maxStep = state.dataFollow.listUser.length;
-
                     return state;
                 });
                 timeoutGetFollowers = setTimeout(() => {
@@ -92,8 +100,10 @@ const Actions = {
                     if (egde_followed.page_info.has_next_page
                         && state.dataFollow.listUser.length <= state.filter.limit
                         && state.filter.limit > state.filter.pageSize) {
+                        this.logged(`Continue get list user`);
                         this.getListFollow(egde_followed.page_info.end_cursor);
                     } else {
+                        this.logged(`Stop get list user`);
                         Store.setState(state => {
                             state.loading_get_list_user_followers = false;
                             return state;
@@ -104,7 +114,7 @@ const Actions = {
 
         }).catch(ex => {
             clearTimeout(timeoutGetFollowers);
-            alert('Get list user follow failed ', ex);
+            this.logged(`Stop get list user`);
             Store.setState(state => {
                 state.dataFollow.total = 0;
                 state.loading_get_list_user_followers = false;
@@ -153,9 +163,10 @@ const Actions = {
         if (_listUser.length === 0) return null;
         if (_listUser.length === 1) return _listUser[0].node.id;
         let index = Utils.randomIntFromTo(0, _listUser.length - 1);
-        console.log('===', index, _listUser);
-
-        if (index <= _listUser.length) return _listUser[index].node.id;
+        if (index <= _listUser.length) {
+            this.logged(`Follow ${_listUser[index].node.username}`);
+            return _listUser[index].node.id;
+        }
         else this.randomUserId();
     },
 
@@ -163,16 +174,21 @@ const Actions = {
         clearTimeout(timeoutFollowAll);
         clearTimeout(intervalProgress);
         let userId = this.randomUserId();
-        if (!userId) return Store.setState(state => {
-            state.loading_follow_list_user = false;
-            return state;
-        });
+        if (!userId) {
+            this.logged(`Stop follow all user`);
+            return Store.setState(state => {
+                state.loading_follow_list_user = false;
+                return state;
+            });
+        }
+
         Store.setState(state => {
             state.loading_follow_list_user = true;
             return state;
         });
         API.followAll(userId, Store.getState().infoAccount.token).then(data => {
             if (data.data.status === 'ok') {
+                this.logged(`Follow success`);
                 Store.setState(state => {
                     state.dataFollow.listUser.map((item, index) => {
                         if (item.node.id === userId) {
@@ -185,9 +201,11 @@ const Actions = {
                 });
                 this.continueFollowAll()
 
+            } else {
+                this.logged(`Follow userid ${userId} failed`);
             }
         }).catch(ex => {
-            alert(`Follow userid ${userId} failed`, ex);
+            this.logged(`Follow userid ${userId} failed`);
             clearTimeout(timeoutFollowAll);
             clearInterval(intervalProgress);
             this.continueFollowAll()
@@ -203,6 +221,7 @@ const Actions = {
         let timeOut = Utils.randomIntFromTo(min, max);
 
         let timer = timeOut / 100;
+        this.logged(`Please wait ${timeOut * 1000} second to continue`);
 
         intervalProgress = setInterval(() => {
             Store.setState(state => {
@@ -215,9 +234,17 @@ const Actions = {
             Store.setState(state => {
                 state.progress = 0;
                 return state;
-            })
+            });
             this.followAll();
         }, timeOut * 1000)
+    },
+
+    unfollowAll() {
+
+    },
+
+    continueUnfollowAll() {
+
     },
     setShowFollowed(is) {
         Store.setState(state => {
@@ -236,14 +263,14 @@ const Actions = {
         clearTimeout(intervalProgress);
     },
 
-    stopLoadFollowers(){
+    stopLoadFollowers() {
         Store.setState(state => {
             state.loading_get_list_user_followers = false;
             return state;
         });
         clearTimeout(timeoutGetFollowers);
     },
-    stopLoadFollowing(){
+    stopLoadFollowing() {
         Store.setState(state => {
             state.loading_get_list_user_followers = false;
             return state;
@@ -256,7 +283,7 @@ const Actions = {
             return state;
         });
     },
-    showPopup(is){
+    showPopup(is) {
         Store.setState(state => {
             state.showPopup = is;
             return state;

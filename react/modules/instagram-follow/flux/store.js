@@ -7,6 +7,7 @@ let state = {
     infoAccount: {
         token: '',
         id: '',
+        username: '',
         message: '',
         status: ''
     },
@@ -44,7 +45,8 @@ let state = {
     loading_get_list_user_following: false,
     loading_follow_list_user: false,
     progress: 0,
-    showPopup: true
+    showPopup: true,
+    logged: []
 
 };
 

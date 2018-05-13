@@ -5,6 +5,7 @@ import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
 import ButtonFollow from './buttonFollowAll';
 import ButtonLoadFollowers from './buttonLoadFollowers';
+import Terminal from './terminal';
 
 let RightPanel = Store.connect(class RightPanel extends React.Component {
     constructor() {
@@ -51,7 +52,7 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
     }
 
     componentDidUpdate() {
-        if(this.checkboxFollowed){
+        if (this.checkboxFollowed) {
             this.checkboxFollowed.checked = this.props.showFollowed;
         }
     }
@@ -178,6 +179,11 @@ let RightPanel = Store.connect(class RightPanel extends React.Component {
                     </div>
                 </details>
                 <ButtonFollow loading={this.props.loading_follow_list_user}/>
+
+                <details className="config-wrapper" open>
+                    <summary>Logging</summary>
+                    <Terminal/>
+                </details>
             </div>
         )
     }

@@ -7,6 +7,7 @@ class ButtonFollow extends React.Component {
         if (loading) return (
             <div className="multi-actions-button stop"
                  onClick={e => {
+                     Actions.logged('Stop follow all user');
                      Actions.stopFollowAll()
                  }}
             >
@@ -22,6 +23,7 @@ class ButtonFollow extends React.Component {
                  onClick={e => {
                      if(loading) return;
                      Actions.setShowFollowed(false);
+                     Actions.logged('Start follow all user');
                      Actions.followAll()
                  }}
             >
