@@ -39,7 +39,7 @@ let ListFollow = Store.connect(class App extends React.Component {
                         return (
                             <div className={"list-item " + selected} key={index + '_' + node.id}>
                                 <div className='info-avatar'>
-                                    <img src={node.profile_pic_url + '?' + node.id} className="avatar"/>
+                                    <img src={node.profile_pic_url} className="avatar"/>
                                 </div>
                                 <div className="info-user">
                                     <a href={"https://instagram.com/" + node.username}>{node.username}</a>
