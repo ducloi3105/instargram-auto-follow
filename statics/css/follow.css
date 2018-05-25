@@ -87,13 +87,6 @@
     white-space: nowrap;
 }
 
-#follow-instagram-310594 .follow-container h1.follow-icon {
-    background-image: url(../images/instagram.png);
-    background-repeat: no-repeat;
-    background-position: -478px -321px;
-    height: 58px;
-    width: 58px;
-}
 
 #follow-instagram-310594 .follow-container h1.follow-icon.follow-icon-instagram {
     background-position: 0 -264px;

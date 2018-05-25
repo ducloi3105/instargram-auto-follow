@@ -45,7 +45,7 @@ const App = Store.connect(class App extends React.Component {
         if (!infoAcc.token || !infoAcc.id) return null;
         return (
             <div className="follow-container" onClick={this.showPopup} title="Automation for Instagram™"
-                 style={{backgroundImage: `url(${chrome.extension.getURL('display_image.png')})`}}
+                 style={{backgroundImage: `url(${chrome.extension.getURL('follow_me.png')})`}}
             />
         )
     }

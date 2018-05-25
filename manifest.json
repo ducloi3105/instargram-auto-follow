@@ -3,7 +3,7 @@
   "description": "Follow instagram extension",
   "version": "1.0",
   "browser_action": {
-    "default_icon": "./statics/images/auto.png"
+    "default_icon": "./statics/images/followme.png"
   },
   "permissions": [
     "tabs",
@@ -19,24 +19,18 @@
       "js": [
         "./statics/bundles/commons.js",
         "./statics/bundles/instagram-follow.js"
-      ],
-      "images": [
-        "./statics/images/display_image.png"
       ]
     }
   ],
   "web_accessible_resources": [
     "./statics/bundles/commons.js",
     "./statics/bundles/instagram-follow.js",
-    "display_image.png"
+    "follow_me.png"
   ],
   "background": {
     "scripts": [
       "./statics/bundles/commons.js",
       "./statics/bundles/instagram-follow.js"
-    ],
-    "images":[
-        "./statics/images/display_image.png"
     ],
     "persistent": true
   },

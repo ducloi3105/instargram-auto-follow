@@ -1,8 +1,8 @@
 {
-  "name": "ims",
+  "name": "Instagram-follow",
   "version": "2.0.0",
-  "description": "React for IMS v2.0",
-  "author": "ChannelVN - VCcorp",
+  "description": "React build module",
+  "author": "ducloi3105 - VCCloud - VCCorp",
   "private": true,
   "scripts": {
     "build": "gulp",
