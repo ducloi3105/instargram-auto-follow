@@ -3,7 +3,7 @@
   "description": "Follow instagram extension",
   "version": "1.0",
   "browser_action": {
-    "default_icon": "./statics/images/followme.png"
+    "default_icon": "./statics/images/auto_follow.png"
   },
   "permissions": [
     "tabs",
